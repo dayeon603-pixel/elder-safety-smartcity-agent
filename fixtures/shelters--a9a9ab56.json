@@ -1,0 +1,1 @@
+{"sgg_code":"11620","region":"서울특별시 관악구","at":"2025-07-22T17:00+09:00","is_holiday":false,"holiday_table_covered":true,"total":0,"open":0,"unknown":0,"items":[],"rules":["평일 09-18시: 개방으로 간주 (공개자료에 운영시간이 없어 기본 운영시간 가정)","평일 야간: night_open=1 이면 개방, 0 이면 폐쇄, NULL 이면 미상","주말·공휴일 주간: weekend_open 기준; 주말·공휴일 야간: weekend_open 과 night_open 모두 필요"],"note":"자료 없음 (이 시군구의 무더위쉼터 공개자료가 없다)"}
