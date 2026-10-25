@@ -1,0 +1,24 @@
+{
+  "slides": [
+    {
+      "layout": "Title Slide",
+      "title": "화재 신고 분류, 영점",
+      "body": ["신고 문자를 3초 안에 분류합니다"],
+      "notes": "영점은 화재 신고를 빠르게 분류하는 서비스입니다."
+    },
+    {
+      "layout": "Title and Content",
+      "title": "문제: 출동이 늦습니다",
+      "body": ["신고가 몰리면 순서가 밀립니다", "분류는 사람이 합니다"],
+      "image": "/Users/chloekang/kcf/deck/assets/Eunpyeong_Fire_Station_in_Seoul_Korea_20200926_001.jpg",
+      "credit": "사진: Mobius6, CC BY-SA 4.0, Wikimedia Commons",
+      "notes": "현재는 상황실 요원이 하나씩 읽고 분류합니다."
+    },
+    {
+      "layout": "Title Only",
+      "title": "성능: 기준선 대비",
+      "image": "/Users/chloekang/kcf/app/backend/figures/out/bar_metrics.png",
+      "notes": "기준선과 우리 방식을 비교한 결과입니다."
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+/* 현장 단말: everything scales with vmin so one layout serves 390x844 phones and 1180x820 tablets. */
+.tm-root {
+  position: fixed; inset: 0; height: 100dvh; width: 100vw; overflow: hidden;
+  display: flex; flex-direction: column; padding: max(3vmin, env(safe-area-inset-top)) 4vmin max(3vmin, env(safe-area-inset-bottom));
+  background: var(--tm-bg); color: var(--tm-fg); -webkit-user-select: none; user-select: none;
+  font-family: "Pretendard Variable", Pretendard, system-ui, sans-serif; word-break: keep-all; text-wrap: balance;
+  touch-action: manipulation;
+}
+.tm-root *, .tm-root *::before, .tm-root *::after { box-sizing: border-box; }
+.tm-dot { position: absolute; top: 2.2vmin; right: 2.2vmin; width: max(14px, 2.2vmin); height: max(14px, 2.2vmin); border-radius: 50%; border: 2px solid #fff; }
+.tm-dot[data-state="open"] { background: #3ddc84; }
+.tm-dot[data-state="connecting"], .tm-dot[data-state="reconnecting"] { background: #ffb300; }
+
+.tm-start { all: unset; position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4vmin; cursor: pointer; background: #0b1220; color: #fff; text-align: center; }
+.tm-start-stop { font-size: clamp(1.75rem, 6vmin, 4rem); font-weight: 600; color: #ffd54a; }
+.tm-start-btn { font-size: clamp(5rem, 24vmin, 16rem); font-weight: 800; line-height: 1; background: #ffd54a; color: #0b1220; padding: 0.15em 0.9em; border-radius: 0.25em; }
+.tm-start-hint { font-size: clamp(1.375rem, 4vmin, 2.5rem); max-width: 80vw; }
+
+.tm-idle { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.tm-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 3vmin; padding-right: 4vmin; }
+.tm-stop { font-size: clamp(1.75rem, 6.2vmin, 4.5rem); font-weight: 700; line-height: 1.15; }
+.tm-stop small { display: block; font-size: clamp(1.25rem, 3.4vmin, 2.25rem); font-weight: 500; color: #ffd54a; }
+.tm-clock { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tm-clock b { display: block; font-size: clamp(2.5rem, 10vmin, 8rem); line-height: 1; font-weight: 800; }
+.tm-clock span { font-size: clamp(1.25rem, 3.6vmin, 2.5rem); }
+
+.tm-grid { flex: 1; min-height: 0; display: grid; gap: 2.5vmin; margin-top: 2.5vmin; grid-template-columns: 1fr; grid-template-rows: 1.25fr 1fr 1fr; }
+@media (orientation: landscape) { .tm-grid { grid-template-columns: 1.1fr 1fr; grid-template-rows: 1fr 1fr; } .tm-panel-temp { grid-row: span 2; } }
+.tm-panel { gap: 1.2vmin; background: #16213a; border: 0.5vmin solid #ffd54a; border-radius: 2vmin; padding: 2.5vmin 3vmin; display: flex; flex-direction: column; justify-content: center; min-height: 0; overflow: hidden; }
+.tm-label { line-height: 1.2; flex: none; font-size: clamp(1.375rem, 4.2vmin, 3rem); font-weight: 600; color: #ffd54a; }
+.tm-big { line-height: 1.05; white-space: nowrap; font-size: clamp(3rem, 15vmin, 11rem); font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.tm-panel-temp .tm-big { font-size: clamp(5rem, 30vmin, 20rem); }
+@media (orientation: landscape) {
+  .tm-big { font-size: clamp(3rem, 11vmin, 8rem); }
+  .tm-panel-temp .tm-big { font-size: min(27vmin, 15vw); }
+}
+.tm-big small { font-size: 0.4em; font-weight: 700; margin-left: 0.1em; }
+.tm-sub { line-height: 1.25; font-size: clamp(1.25rem, 3.6vmin, 2.5rem); font-weight: 500; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.tm-note { line-height: 1.2; font-size: clamp(1.5rem, 5.5vmin, 4rem); font-weight: 700; }
+.tm-foot { font-size: clamp(1.125rem, 2.6vmin, 1.75rem); margin-top: 1.5vmin; opacity: 1; color: #d6dbe6; }
+
+.tm-alert { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; gap: 5vmin; flex-direction: column; text-align: center; }
+@media (orientation: landscape) { .tm-alert { flex-direction: row; text-align: left; } }
+.tm-icon { flex: none; width: min(34vmin, 38vw); height: min(34vmin, 38vw); color: var(--tm-accent); }
+.tm-title { font-size: clamp(2.5rem, 13vmin, 9rem); font-weight: 800; line-height: 1.12; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+.tm-body { font-size: clamp(1.75rem, 7vmin, 5.5rem); font-weight: 600; line-height: 1.25; margin-top: 2vmin; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+.tm-tag { align-self: center; font-size: clamp(1.125rem, 2.8vmin, 1.875rem); font-weight: 600; border: 2px solid currentColor; border-radius: 999px; padding: 0.3em 1em; margin-top: 1.5vmin; }
+.tm-replay { all: unset; position: absolute; inset: 0; cursor: pointer; }
+.tm-sound { font-size: clamp(1.25rem, 3vmin, 2rem); font-weight: 700; color: var(--tm-accent); }
+
+.tm-flash { position: absolute; inset: 0; pointer-events: none; border: 2.4vmin solid var(--tm-accent); animation: tm-flash var(--tm-flash-period, 1s) ease-in-out var(--tm-flash-count, 30); }
+@keyframes tm-flash { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+/* The global reduced-motion rule kills animations; the alert flash is the one exception (1 Hz, border only). */
+@media (prefers-reduced-motion: reduce) {
+  .tm-flash { animation-duration: var(--tm-flash-period, 1s) !important; animation-iteration-count: var(--tm-flash-count, 30) !important; }
+}
+.tm-error { margin: auto; font-size: clamp(2rem, 8vmin, 5rem); font-weight: 700; text-align: center; }
+
+@media (orientation: landscape) { .tm-title { font-size: clamp(2.5rem, 12vmin, 9rem); } }
+
+/* Landscape phone (short screens): tighter header and panels so label and value never collide. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .tm-stop { font-size: clamp(1.5rem, 7vmin, 2.5rem); }
+  .tm-clock b { font-size: clamp(2rem, 11vmin, 4rem); }
+  .tm-panel { padding: 1.5vmin 2.5vmin; gap: 0.6vmin; }
+  .tm-label { font-size: clamp(1.125rem, 4.6vmin, 1.5rem); }
+  .tm-big { font-size: clamp(2rem, 13vmin, 3.5rem); }
+  .tm-panel-temp .tm-big { font-size: clamp(3rem, 24vmin, 6rem); }
+  .tm-sub { font-size: clamp(1rem, 4.4vmin, 1.5rem); -webkit-line-clamp: 1; }
+  .tm-note { font-size: clamp(1.5rem, 8vmin, 2.5rem); }
+  .tm-foot { display: none; }
+}
+
+/* Smooth hand-over between idle and alerts; colours cross-fade, layout never jumps (panels keep fixed grid rows). */
+.tm-root { transition: background-color 320ms ease; }
+.tm-alert, .tm-idle { animation: tm-in 340ms ease-out; }
+@keyframes tm-in { from { opacity: 0; transform: translateY(1.2vmin); } to { opacity: 1; transform: none; } }
+.tm-start-hint { white-space: nowrap; font-size: clamp(1.125rem, 3.6vmin, 2rem); }

@@ -1,0 +1,176 @@
+{
+ "audit": {
+  "files": 298,
+  "rows_pulled_all_sido": 627108,
+  "rows_seoul_incident": 542481,
+  "hour_missing": 4,
+  "rows_seoul_2024_01_11": 500384,
+  "ca_all_places": 13533,
+  "ca_home": 10466,
+  "ca_place_null": 533,
+  "public_ca": 2534,
+  "public_ca_excl_group_residence": 2101,
+  "public_place_counts": {
+   "상업시설": 467,
+   "집단거주시설": 433,
+   "도로외교통지역": 393,
+   "의료관련시설": 383,
+   "도로": 319,
+   "기타": 198,
+   "바다/강/산/논밭": 112,
+   "오락/문화시설": 83,
+   "공장/산업/건설시설": 63,
+   "운동시설": 47,
+   "학교/교육시설": 29,
+   "일차산업장": 7
+  }
+ },
+ "diag": {
+  "n_aed_seoul": 11490,
+  "wd_missing_any_day": 758,
+  "wd24_all_week_days": 5558,
+  "weekend24_both_days": 5654,
+  "holiday24": 5691,
+  "placeholder_pattern_n": 217,
+  "placeholder_pattern_share": 0.018885987815491733,
+  "share_we24_given_wd_not24": 0.03658125421443021,
+  "share_we24_given_wd24": 0.9782295789852465,
+  "sat_missing": 3384,
+  "sun_missing": 3990,
+  "hol_missing": 4381,
+  "hol24_given_we24": 0.9992925362575168,
+  "wd_daytime_only_n": 5083,
+  "serialSeq_year_counts_if_date": {
+   "2010": 2,
+   "2011": 3,
+   "2012": 52,
+   "2013": 45,
+   "2014": 8,
+   "2015": 55,
+   "2016": 76,
+   "2017": 154,
+   "2018": 343,
+   "2019": 247,
+   "2020": 478,
+   "2021": 332,
+   "2022": 937,
+   "2023": 4754,
+   "2024": 2036,
+   "2025": 1401,
+   "2026": 567
+  }
+ },
+ "desc": {
+  "weekday": {
+   "share_arrests_when_open_lt_30pct": [
+    0.0,
+    0.0,
+    0.0015137272554756767,
+    0
+   ],
+   "share_arrests_when_open_lt_50pct": [
+    0.13575374901341752,
+    0.12296714424608435,
+    0.14964309273639714,
+    344
+   ],
+   "night_share_of_arrests_22_06": [
+    0.17640094711917917,
+    0.1620530060100113,
+    0.19172856964073068,
+    447
+   ],
+   "mean_pct_open_night": 49.317885117493475,
+   "mean_pct_open_day": 78.335726718886,
+   "arrest_weighted_pct_open_night": 48.89601489373481,
+   "arrest_weighted_pct_open_day": 80.79966625012258
+  },
+  "weekend_W1_as_reported": {
+   "share_arrests_when_open_lt_30pct": [
+    0.0,
+    0.0,
+    0.0015137272554756767,
+    0
+   ],
+   "share_arrests_when_open_lt_50pct": [
+    0.11878453038674033,
+    0.10676071207024147,
+    0.13196246119636432,
+    301
+   ],
+   "night_share_of_arrests_22_06": [
+    0.17640094711917917,
+    0.1620530060100113,
+    0.19172856964073068,
+    447
+   ],
+   "mean_pct_open_night": 51.49423411662315,
+   "mean_pct_open_day": 62.46165143603133,
+   "arrest_weighted_pct_open_night": 51.395678794077355,
+   "arrest_weighted_pct_open_day": 62.69668882543888
+  },
+  "weekend_W2_placeholder_as_weekday": {
+   "share_arrests_when_open_lt_30pct": [
+    0.0,
+    0.0,
+    0.0015137272554756767,
+    0
+   ],
+   "share_arrests_when_open_lt_50pct": [
+    0.15430149960536702,
+    0.14076051325058941,
+    0.1688890724445935,
+    391
+   ],
+   "night_share_of_arrests_22_06": [
+    0.17640094711917917,
+    0.1620530060100113,
+    0.19172856964073068,
+    447
+   ],
+   "mean_pct_open_night": 49.6693864229765,
+   "mean_pct_open_day": 61.463283289817234,
+   "arrest_weighted_pct_open_night": 49.57640878870998,
+   "arrest_weighted_pct_open_day": 61.72027956402477
+  },
+  "weekend_W3_placeholder_unknown_dropped": {
+   "share_arrests_when_open_lt_30pct": [
+    0.0,
+    0.0,
+    0.0015137272554756767,
+    0
+   ],
+   "share_arrests_when_open_lt_50pct": [
+    0.13970007892659828,
+    0.12674646725822392,
+    0.15374448221632175,
+    354
+   ],
+   "night_share_of_arrests_22_06": [
+    0.17640094711917917,
+    0.1620530060100113,
+    0.19172856964073068,
+    447
+   ],
+   "mean_pct_open_night": 50.560520713208554,
+   "mean_pct_open_day": 61.73905570832964,
+   "arrest_weighted_pct_open_night": 50.44595937364789,
+   "arrest_weighted_pct_open_day": 61.90980542083892
+  }
+ },
+ "w_star": 1.0,
+ "val_ll": {
+  "0.0": -1466.284656651018,
+  "0.25": -652.4484159860485,
+  "0.5": -602.2060476250958,
+  "0.75": -579.7429984963597,
+  "0.9": -574.7395960059316,
+  "1.0": -574.6697397045026
+ },
+ "n_train_public": 1918,
+ "n_test_public": 616,
+ "budgets": {
+  "1%": 115,
+  "5%": 574
+ }
+}

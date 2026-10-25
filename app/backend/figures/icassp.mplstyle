@@ -1,0 +1,38 @@
+# ICASSP-style single-column figure (3.5 in wide), serif, thin axes.
+# Korean glyphs fall back to AppleGothic (macOS); falls back to DejaVu Serif for the rest.
+figure.figsize: 3.5, 2.4
+figure.dpi: 150
+savefig.dpi: 300
+savefig.bbox: tight
+savefig.pad_inches: 0.02
+
+# explicit family list enables per-glyph fallback (matplotlib >= 3.6)
+font.family: Times New Roman, STIXGeneral, AppleGothic, DejaVu Serif
+mathtext.fontset: stix
+font.size: 8
+axes.titlesize: 9
+axes.labelsize: 8
+xtick.labelsize: 7
+ytick.labelsize: 7
+legend.fontsize: 7
+legend.frameon: False
+axes.unicode_minus: False
+
+axes.linewidth: 0.5
+axes.spines.top: False
+axes.spines.right: False
+xtick.major.width: 0.5
+ytick.major.width: 0.5
+xtick.major.size: 2.5
+ytick.major.size: 2.5
+lines.linewidth: 1.0
+lines.markersize: 3
+grid.linewidth: 0.3
+grid.alpha: 0.5
+axes.grid: False
+
+# Okabe-Ito colorblind-safe palette
+axes.prop_cycle: cycler('color', ['0072B2', 'D55E00', '009E73', 'E69F00', 'CC79A7', '56B4E9', 'F0E442', '000000'])
+
+pdf.fonttype: 42
+ps.fonttype: 42

@@ -1,0 +1,794 @@
+{
+ "seed": 42,
+ "walk_speed_ms": 0.8,
+ "walk_min": 5.0,
+ "detour": 1.3,
+ "radius_m": 184.6153846153846,
+ "detour_band": [
+  1.15,
+  1.5
+ ],
+ "dongs_polygons": 3559,
+ "dongs_polygon_without_pop_row": 0,
+ "pop_rows_without_polygon": 60,
+ "p65_without_polygon": 44315.0,
+ "p65_total_in_polygons": 11269301.0,
+ "heat_units": 250,
+ "dongs_without_heat_unit_weight": 0,
+ "p65_without_heat_weight_share": 0.0,
+ "n_points": 1035803,
+ "p65_pts_share_in_coarse_cells_gt200m": 0.30359016943464373,
+ "stops": {
+  "raw": 227065,
+  "dup_id": 0,
+  "dropped_nan": 5,
+  "dropped_zero": 0,
+  "dropped_outside_korea": 7,
+  "dropped_total": 12,
+  "same_location_extra_poles": 4070,
+  "unassigned_to_dong": 171,
+  "clean": 227053
+ },
+ "national_access": {
+  "mid": 0.4452780404035663,
+  "hi_acc": 0.48918085952754015,
+  "lo_acc": 0.3929483681952638,
+  "p65_weighted_median_nearest_stop_m": 215.33271707315234
+ },
+ "national_access_fine_cells_le200m": {
+  "p65_share_of_total": 0.6964098305653563,
+  "covered_share": 0.5838481345719102
+ },
+ "national_access_coarse_cells_gt200m_covered_share": 0.12741012003937774,
+ "sigungu_flag_stop_data_missing": {
+  "n": 9,
+  "p65_share": 0.020156884619551826,
+  "names": [
+   "강릉시",
+   "고성군",
+   "동해시",
+   "속초시",
+   "양구군",
+   "화천군",
+   "강진군",
+   "보성군",
+   "익산시"
+  ]
+ },
+ "sigungu_flag_rural_uniform_lower_bound": {
+  "n": 118,
+  "p65_share": 0.27814502425660653
+ },
+ "national_share_excluding_flagged": 0.5657910241389038,
+ "sigungu_n": 256,
+ "sigungu_n_unflagged": 129,
+ "sigungu_share_quantiles": {
+  "0": 0.21722001495324395,
+  "0.05": 0.3136599808887811,
+  "0.25": 0.4463207672148494,
+  "0.5": 0.5659889080346525,
+  "0.75": 0.6815201510356688,
+  "0.95": 0.7774547951200829,
+  "1": 0.9388026603414198
+ },
+ "sigungu_worst5": [
+  {
+   "sido": "울산광역시",
+   "sgg": "북구",
+   "share_65_walk5": 0.21722001495324395,
+   "p65": 30145.0
+  },
+  {
+   "sido": "경상남도",
+   "sgg": "거제시",
+   "share_65_walk5": 0.22069449670864216,
+   "p65": 39600.0
+  },
+  {
+   "sido": "경상남도",
+   "sgg": "창원시의창구",
+   "share_65_walk5": 0.2630207473680398,
+   "p65": 44148.0
+  },
+  {
+   "sido": "경상남도",
+   "sgg": "창원시진해구",
+   "share_65_walk5": 0.2860386620337545,
+   "p65": 37900.0
+  },
+  {
+   "sido": "충청북도",
+   "sgg": "충주시",
+   "share_65_walk5": 0.3012992874293568,
+   "p65": 55492.0
+  }
+ ],
+ "dong_n_p65_ge_100": 3557,
+ "dong_share_lt50_p65_share": 0.5688616356950622,
+ "siting_table": [
+  {
+   "N": 500,
+   "method": "ours_greedy_heat",
+   "heat_weighted": 0.0323827181793404,
+   "p65": 0.035634181495724844,
+   "picks_in_top_heat_quartile": 0.088,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 500,
+   "method": "pop_greedy",
+   "heat_weighted": 0.029832217577264505,
+   "p65": 0.039007017619180746,
+   "picks_in_top_heat_quartile": 0.004,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 500,
+   "method": "top_n_by_p65_static",
+   "heat_weighted": 0.013294774436988194,
+   "p65": 0.017478887594845883,
+   "picks_in_top_heat_quartile": 0.0,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 500,
+   "method": "stop_density_proxy",
+   "heat_weighted": 0.002368325268543893,
+   "p65": 0.0032706823821876565,
+   "picks_in_top_heat_quartile": 0.174,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 500,
+   "method": "random_mean",
+   "heat_weighted": 0.003385346980460181,
+   "p65": 0.0039558560224074325,
+   "picks_in_top_heat_quartile": 0.30345999999999995,
+   "heat_weighted_lo": 0.0028535860329617097,
+   "heat_weighted_hi": 0.003931389946303574,
+   "p65_lo": 0.0033310977165261478,
+   "p65_hi": 0.004628337896652475
+  },
+  {
+   "N": 1000,
+   "method": "ours_greedy_heat",
+   "heat_weighted": 0.05614863437218652,
+   "p65": 0.06324280354332683,
+   "picks_in_top_heat_quartile": 0.108,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 1000,
+   "method": "pop_greedy",
+   "heat_weighted": 0.05228022589147037,
+   "p65": 0.06877881918264203,
+   "picks_in_top_heat_quartile": 0.003,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 1000,
+   "method": "top_n_by_p65_static",
+   "heat_weighted": 0.021916047781966864,
+   "p65": 0.028700536130131418,
+   "picks_in_top_heat_quartile": 0.0,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 1000,
+   "method": "stop_density_proxy",
+   "heat_weighted": 0.004351216983861898,
+   "p65": 0.005922982445825395,
+   "picks_in_top_heat_quartile": 0.156,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 1000,
+   "method": "random_mean",
+   "heat_weighted": 0.0067131816359454755,
+   "p65": 0.007843807990268199,
+   "picks_in_top_heat_quartile": 0.300975,
+   "heat_weighted_lo": 0.0059709827059425714,
+   "heat_weighted_hi": 0.007590351405166965,
+   "p65_lo": 0.0070010332341616625,
+   "p65_hi": 0.008941558477637042
+  },
+  {
+   "N": 2000,
+   "method": "ours_greedy_heat",
+   "heat_weighted": 0.09454941565424904,
+   "p65": 0.10900896392005119,
+   "picks_in_top_heat_quartile": 0.1125,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 2000,
+   "method": "pop_greedy",
+   "heat_weighted": 0.08907934833734037,
+   "p65": 0.11645597186558851,
+   "picks_in_top_heat_quartile": 0.0075,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 2000,
+   "method": "top_n_by_p65_static",
+   "heat_weighted": 0.03586582727962374,
+   "p65": 0.04715598838369212,
+   "picks_in_top_heat_quartile": 0.0,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 2000,
+   "method": "stop_density_proxy",
+   "heat_weighted": 0.009672557495439599,
+   "p65": 0.012947406847879782,
+   "picks_in_top_heat_quartile": 0.144,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 2000,
+   "method": "random_mean",
+   "heat_weighted": 0.013356403883201909,
+   "p65": 0.01560231477015547,
+   "picks_in_top_heat_quartile": 0.301915,
+   "heat_weighted_lo": 0.012537087276725457,
+   "heat_weighted_hi": 0.014370897686565846,
+   "p65_lo": 0.01455494122432627,
+   "p65_hi": 0.016871729832132136
+  },
+  {
+   "N": 5000,
+   "method": "ours_greedy_heat",
+   "heat_weighted": 0.17482172511743244,
+   "p65": 0.20481540243289773,
+   "picks_in_top_heat_quartile": 0.1184,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 5000,
+   "method": "pop_greedy",
+   "heat_weighted": 0.16814310946424138,
+   "p65": 0.21245248226513988,
+   "picks_in_top_heat_quartile": 0.035,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 5000,
+   "method": "top_n_by_p65_static",
+   "heat_weighted": 0.06974775687986018,
+   "p65": 0.09142692004305429,
+   "picks_in_top_heat_quartile": 0.0026,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 5000,
+   "method": "stop_density_proxy",
+   "heat_weighted": 0.025158918219751684,
+   "p65": 0.03310493441033923,
+   "picks_in_top_heat_quartile": 0.1216,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 5000,
+   "method": "random_mean",
+   "heat_weighted": 0.032418477456912814,
+   "p65": 0.03780711628842055,
+   "picks_in_top_heat_quartile": 0.301999,
+   "heat_weighted_lo": 0.03100015516918698,
+   "heat_weighted_hi": 0.03392054347775523,
+   "p65_lo": 0.036021262799573725,
+   "p65_hi": 0.03957775870150524
+  },
+  {
+   "N": 10000,
+   "method": "ours_greedy_heat",
+   "heat_weighted": 0.2543200273240938,
+   "p65": 0.2961538256929281,
+   "picks_in_top_heat_quartile": 0.1375,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 10000,
+   "method": "pop_greedy",
+   "heat_weighted": 0.24901825838530847,
+   "p65": 0.30188534748973805,
+   "picks_in_top_heat_quartile": 0.0692,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 10000,
+   "method": "top_n_by_p65_static",
+   "heat_weighted": 0.11084010415560995,
+   "p65": 0.1458553508562628,
+   "picks_in_top_heat_quartile": 0.0039,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 10000,
+   "method": "stop_density_proxy",
+   "heat_weighted": 0.04863090911062772,
+   "p65": 0.06316494470914202,
+   "picks_in_top_heat_quartile": 0.1122,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 10000,
+   "method": "random_mean",
+   "heat_weighted": 0.06163012945212047,
+   "p65": 0.07164528528570532,
+   "picks_in_top_heat_quartile": 0.30267299999999997,
+   "heat_weighted_lo": 0.059422918917291005,
+   "heat_weighted_hi": 0.0636890391105125,
+   "p65_lo": 0.06909121096261657,
+   "p65_hi": 0.07416270240274841
+  },
+  {
+   "N": 500,
+   "method": "ours_greedy_heat_sido_quota",
+   "heat_weighted": 0.028628405676708525,
+   "p65": 0.029057931608103323,
+   "picks_in_top_heat_quartile": 0.214,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 1000,
+   "method": "ours_greedy_heat_sido_quota",
+   "heat_weighted": 0.050314912549501184,
+   "p65": 0.052675391903503364,
+   "picks_in_top_heat_quartile": 0.217,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 2000,
+   "method": "ours_greedy_heat_sido_quota",
+   "heat_weighted": 0.08622690015305633,
+   "p65": 0.09290003367825582,
+   "picks_in_top_heat_quartile": 0.2,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 5000,
+   "method": "ours_greedy_heat_sido_quota",
+   "heat_weighted": 0.16434075405189008,
+   "p65": 0.18312131477060012,
+   "picks_in_top_heat_quartile": 0.1958,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  },
+  {
+   "N": 10000,
+   "method": "ours_greedy_heat_sido_quota",
+   "heat_weighted": 0.24472209542233275,
+   "p65": 0.27837326798674433,
+   "picks_in_top_heat_quartile": 0.1982,
+   "heat_weighted_lo": NaN,
+   "heat_weighted_hi": NaN,
+   "p65_lo": NaN,
+   "p65_hi": NaN
+  }
+ ],
+ "siting_note": "Optimiser is scored on the objective it maximises (in-sample by construction); random band = 200 draws, 2.5-97.5 percentile. N_head=2000.",
+ "candidates": 222983,
+ "p65_covered_by_any_stop": 0.4452780404035663,
+ "detour_sensitivity_N2000_pick_at_1.3": [
+  {
+   "detour": 1.15,
+   "method": "ours_greedy_heat",
+   "heat_weighted": 0.105843552528477,
+   "p65": 0.12200498763752234
+  },
+  {
+   "detour": 1.15,
+   "method": "pop_greedy",
+   "heat_weighted": 0.09949777724491542,
+   "p65": 0.13005397376272385
+  },
+  {
+   "detour": 1.15,
+   "method": "top_n_by_p65_static",
+   "heat_weighted": 0.03906678646162144,
+   "p65": 0.051399597022027024
+  },
+  {
+   "detour": 1.15,
+   "method": "stop_density_proxy",
+   "heat_weighted": 0.01137677320940211,
+   "p65": 0.015262820381976839
+  },
+  {
+   "detour": 1.15,
+   "method": "random_mean",
+   "heat_weighted": 0.01694142942305474,
+   "p65": NaN
+  },
+  {
+   "detour": 1.5,
+   "method": "ours_greedy_heat",
+   "heat_weighted": 0.06742502203339978,
+   "p65": 0.07747415564805445
+  },
+  {
+   "detour": 1.5,
+   "method": "pop_greedy",
+   "heat_weighted": 0.06349331649607146,
+   "p65": 0.0829433367107931
+  },
+  {
+   "detour": 1.5,
+   "method": "top_n_by_p65_static",
+   "heat_weighted": 0.02972018786824969,
+   "p65": 0.03909163625042685
+  },
+  {
+   "detour": 1.5,
+   "method": "stop_density_proxy",
+   "heat_weighted": 0.008003191331642446,
+   "p65": 0.010752796627399735
+  },
+  {
+   "detour": 1.5,
+   "method": "random_mean",
+   "heat_weighted": 0.010113227427974174,
+   "p65": NaN
+  }
+ ],
+ "seoul_network": {
+  "demand_points": 144700,
+  "p65_demand_total": 1965896.0,
+  "snap_gt150m_p65_share": 0.0013636895417732378,
+  "median_net_over_straight_ratio_nearest_stop_50_185m": 1.5310493946401393,
+  "ratio_iqr": [
+   1.3472770037682344,
+   1.8237891584197394
+  ],
+  "all_stops_building_weighted": {
+   "straight_1.3": 0.8508848856675739,
+   "network_240m": 0.6407652709800777,
+   "straight_1.5": 0.7833913072826391
+  },
+  "all_stops_uniform_polygon_straight_1.3": 0.7060075166540215,
+  "methods_N2000_nationwide_picks_restricted_to_seoul": [
+   {
+    "method": "ours_greedy_heat",
+    "n_seoul_picks": 823,
+    "straight_heat": 0.32922697719893973,
+    "network_heat": 0.19766640811152095,
+    "straight_p65": 0.3117874941548119,
+    "network_p65": 0.18729603402681932
+   },
+   {
+    "method": "pop_greedy",
+    "n_seoul_picks": 1062,
+    "straight_heat": 0.39627989704456074,
+    "network_heat": 0.23362011930130117,
+    "straight_p65": 0.39035231300802764,
+    "network_p65": 0.22974378486836847
+   },
+   {
+    "method": "top_n_by_p65_static",
+    "n_seoul_picks": 1465,
+    "straight_heat": 0.20468847872554113,
+    "network_heat": 0.14593094857390038,
+    "straight_p65": 0.1999834517766595,
+    "network_p65": 0.14281603177974805
+   },
+   {
+    "method": "stop_density_proxy",
+    "n_seoul_picks": 696,
+    "straight_heat": 0.04227532069205644,
+    "network_heat": 0.028772211922993646,
+    "straight_p65": 0.042821343083938895,
+    "network_p65": 0.02891681756948453
+   },
+   {
+    "method": "random_mean",
+    "n_seoul_picks": 138.16,
+    "straight_heat": 0.037030828800464405,
+    "network_heat": 0.02146563713275743,
+    "straight_p65": NaN,
+    "network_p65": NaN
+   }
+  ]
+ },
+ "outcome_seoul": {
+  "n_gu": 25,
+  "ped70_calls_total": 1533,
+  "road70_calls_total": 19997,
+  "min_detectable_rho_n25_80pct_power": 0.54,
+  "range_unc70_building_straight": [
+   0.07093969362428132,
+   0.23453041831243182
+  ],
+  "ped70_per1000~unc70_building_straight": {
+   "n": 25,
+   "rho": 0.07307692307692308,
+   "lo": -0.3325783972125435,
+   "hi": 0.4829014332659771,
+   "p_perm": 0.7218556288742252
+  },
+  "road70_per1000~unc70_building_straight": {
+   "n": 25,
+   "rho": -0.14692307692307693,
+   "lo": -0.5514457852953187,
+   "hi": 0.276079709626453,
+   "p_perm": 0.47630473905218956
+  },
+  "ped70_calls~unc70_building_straight": {
+   "n": 25,
+   "rho": 0.19207088062378444,
+   "lo": -0.2413891266103835,
+   "hi": 0.5507661947938551,
+   "p_perm": 0.3639272145570886
+  },
+  "confound_unc70_building_straight~dens70": {
+   "n": 25,
+   "rho": -0.20923076923076922,
+   "lo": -0.5787524179353205,
+   "hi": 0.23021864854312624,
+   "p_perm": 0.31593681263747253
+  },
+  "range_unc70_building_network": [
+   0.2582430567911944,
+   0.46530196682529723
+  ],
+  "ped70_per1000~unc70_building_network": {
+   "n": 25,
+   "rho": -0.09230769230769231,
+   "lo": -0.5473523064816184,
+   "hi": 0.3566724041028519,
+   "p_perm": 0.6666666666666666
+  },
+  "road70_per1000~unc70_building_network": {
+   "n": 25,
+   "rho": 0.0007692307692307692,
+   "lo": -0.4336670265245227,
+   "hi": 0.42375260128532793,
+   "p_perm": 0.9988002399520096
+  },
+  "ped70_calls~unc70_building_network": {
+   "n": 25,
+   "rho": 0.04580447854555181,
+   "lo": -0.3647036591619199,
+   "hi": 0.4614284368875283,
+   "p_perm": 0.8294341131773645
+  },
+  "confound_unc70_building_network~dens70": {
+   "n": 25,
+   "rho": -0.18692307692307694,
+   "lo": -0.5334267118447061,
+   "hi": 0.2590356037680685,
+   "p_perm": 0.36372725454909016
+  },
+  "range_unc70_uniform_straight": [
+   0.16733581488966942,
+   0.3886011761414968
+  ],
+  "ped70_per1000~unc70_uniform_straight": {
+   "n": 25,
+   "rho": -0.39076923076923076,
+   "lo": -0.7037137330754352,
+   "hi": 0.014314457081652963,
+   "p_perm": 0.05858828234353129
+  },
+  "road70_per1000~unc70_uniform_straight": {
+   "n": 25,
+   "rho": -0.29615384615384616,
+   "lo": -0.6502584400193904,
+   "hi": 0.13842872504402665,
+   "p_perm": 0.14337132573485303
+  },
+  "ped70_calls~unc70_uniform_straight": {
+   "n": 25,
+   "rho": -0.03348730784422695,
+   "lo": -0.4554280764897717,
+   "hi": 0.4051240806237301,
+   "p_perm": 0.8664267146570686
+  },
+  "confound_unc70_uniform_straight~dens70": {
+   "n": 25,
+   "rho": -0.5023076923076923,
+   "lo": -0.7852886236778271,
+   "hi": -0.07298744322423938,
+   "p_perm": 0.010797840431913617
+  },
+  "confound_ped70_per1000~dens70": {
+   "n": 25,
+   "rho": -0.013076923076923076,
+   "lo": -0.4655777541938866,
+   "hi": 0.4598373365392801,
+   "p_perm": 0.9534093181363728
+  }
+ },
+ "sido": {
+  "n": 17,
+  "pooled_lowfloor_rate_2021": 30.648813557600835,
+  "lowfloor_rate~vuln_ratio": {
+   "n": 17,
+   "rho": -0.3308823529411765,
+   "lo": -0.7965440671807501,
+   "hi": 0.2549517326732673,
+   "p_perm": 0.1983603279344131
+  },
+  "lowfloor_rate~elderly_ratio": {
+   "n": 17,
+   "rho": -0.18627450980392157,
+   "lo": -0.6762242647286605,
+   "hi": 0.36501378562577425,
+   "p_perm": 0.47490501899620075
+  },
+  "lowfloor_per10k_elderly~elderly_ratio": {
+   "n": 17,
+   "rho": -0.6813725490196079,
+   "lo": -0.8808969900467681,
+   "hi": -0.26452079073997886,
+   "p_perm": 0.003199360127974405
+  },
+  "lowfloor_rate~stop_walk5_share": {
+   "n": 17,
+   "rho": 0.48774509803921573,
+   "lo": -0.0925490386112532,
+   "hi": 0.8434782608695653,
+   "p_perm": 0.05378924215156969
+  },
+  "top5_gap_buses": [
+   {
+    "sido": "경기",
+    "lowfloor_rate": 19.2,
+    "gap_to_pooled_rate_buses": 1259.3694913360919
+   },
+   {
+    "sido": "충남",
+    "lowfloor_rate": 9.9,
+    "gap_to_pooled_rate_buses": 186.5297380430782
+   },
+   {
+    "sido": "경북",
+    "lowfloor_rate": 17.3,
+    "gap_to_pooled_rate_buses": 171.2969138605425
+   },
+   {
+    "sido": "울산",
+    "lowfloor_rate": 12.1,
+    "gap_to_pooled_rate_buses": 157.89485920932944
+   },
+   {
+    "sido": "제주",
+    "lowfloor_rate": 17.8,
+    "gap_to_pooled_rate_buses": 106.83283182724288
+   }
+  ],
+  "special_under_legal": [
+   {
+    "sido": "부산",
+    "legal": 312,
+    "operating": 201
+   },
+   {
+    "sido": "대구",
+    "legal": 214,
+    "operating": 199
+   },
+   {
+    "sido": "인천",
+    "legal": 256,
+    "operating": 215
+   },
+   {
+    "sido": "대전",
+    "legal": 131,
+    "operating": 101
+   },
+   {
+    "sido": "충북",
+    "legal": 179,
+    "operating": 173
+   },
+   {
+    "sido": "충남",
+    "legal": 235,
+    "operating": 204
+   },
+   {
+    "sido": "전남",
+    "legal": 242,
+    "operating": 207
+   },
+   {
+    "sido": "경북",
+    "legal": 305,
+    "operating": 238
+   }
+  ],
+  "special_shortfall_total": 336,
+  "note": "lowfloor 2021, special transport 2024, pop 교통약자 year per file; 17 rows, no inference beyond rank correlation"
+ },
+ "recommended_by_sido_N2000": {
+  "서울특별시": 823,
+  "경기도": 319,
+  "인천광역시": 268,
+  "부산광역시": 129,
+  "전남광주통합특별시": 72,
+  "전북특별자치도": 62,
+  "대구광역시": 58,
+  "충청북도": 56,
+  "경상북도": 49,
+  "경상남도": 46,
+  "울산광역시": 46,
+  "대전광역시": 39,
+  "제주특별자치도": 28,
+  "강원특별자치도": 10,
+  "충청남도": 8,
+  "세종특별자치시": 5
+ },
+ "runtime_s": 137.5
+}

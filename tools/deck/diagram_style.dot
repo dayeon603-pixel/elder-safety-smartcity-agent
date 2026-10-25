@@ -1,0 +1,14 @@
+// ICASSP-paper look. diagram.py inserts these statements right after the
+// opening brace of your graph, so your own attributes override them.
+// "@ACCENT@" in your graph is replaced by the accent fill (one box only).
+rankdir=LR;
+splines=ortho;
+nodesep=0.45;
+ranksep=0.55;
+bgcolor="white";
+graph [fontname="STIX Two Text,AppleGothic", fontsize=11];
+node  [shape=box, style="filled,solid", fillcolor="white", color="black",
+       penwidth=0.8, fontname="STIX Two Text,AppleGothic", fontsize=12,
+       fontcolor="black", margin="0.18,0.10"];
+edge  [color="black", penwidth=0.8, arrowsize=0.7,
+       fontname="STIX Two Text,AppleGothic", fontsize=10];

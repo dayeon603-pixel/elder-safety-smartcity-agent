@@ -1,0 +1,12 @@
+digraph example_arch {
+  data   [label="Public\ndataset"];
+  prep   [label="Preprocessing"];
+  model  [label="Model", fillcolor="@ACCENT@"];
+  api    [label="API"];
+  ui     [label="UI"];
+  sqlite [label="SQLite\nstore", shape=cylinder];
+
+  data -> prep -> model -> api -> ui;
+  api -> sqlite [dir=both];
+  {rank=same; api; sqlite;}
+}

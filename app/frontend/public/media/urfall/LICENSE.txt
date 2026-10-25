@@ -1,0 +1,3 @@
+UR Fall Detection Dataset (Kwolek & Kepski, University of Rzeszow), https://fenix.ur.edu.pl/mkepski/ds/uf.html
+Clips fall-01-cam0.mp4 and adl-01-cam0.mp4 (camera 0). License: CC BY-NC-SA 4.0. Non-commercial demonstration only.
+Reference: B. Kwolek, M. Kepski, "Human fall detection on embedded platform using depth maps and wireless accelerometer", Computer Methods and Programs in Biomedicine 117(3), 2014, 489-501.

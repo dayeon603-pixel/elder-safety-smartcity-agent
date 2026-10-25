@@ -1,0 +1,60 @@
+[project]
+name = "kcf-app"
+version = "0.1.0"
+description = "Topic-agnostic hackathon starter: FastAPI + sqlite3 + experiment harness"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+    "fastapi==0.136.1",
+    "uvicorn==0.46.0",
+    "argon2-cffi==25.1.0",
+    "pydantic==2.13.4",
+    # runtime: the agent router calls its own API and Ollama over HTTP
+    "httpx==0.28.1",
+    # runtime: app/actions, app/modules/geo and app/heat/persist (imported by the API) use these
+    "numpy==2.4.4",
+    "pandas>=2.2,<3",
+    # runtime: CAP 1.2 XML + OASIS XSD validation (app/agent/cap_xml.py)
+    "lxml==6.1.3",
+]
+
+[dependency-groups]
+# experiments/{walk4,mobility,silver,edge,fire} only (street networks, optimisation); not in the API image
+geo = [
+    "osmnx>=2.1.1",
+    "networkx>=3.6.1",
+    "shapely>=2.2.0",
+    "scipy>=1.17.1",
+    "pyarrow>=26.0.0",
+]
+science = [
+    "scikit-learn==1.8.0",
+    "matplotlib==3.10.9",
+    "python-pptx==1.0.2",
+    "pyyaml==6.0.2",
+    # experiments/fall/extract_pose.py only (not needed by the API image)
+    "mediapipe>=1.1.1",
+    "opencv-python-headless>=5.0.0.93",
+]
+dev = [
+    "pytest==9.0.3",
+    "ruff==0.15.12",
+    "mypy==1.20.2",
+]
+
+[tool.uv]
+default-groups = ["dev", "science", "geo"]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "experiments/mobility/tests"]
+pythonpath = ["."]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true

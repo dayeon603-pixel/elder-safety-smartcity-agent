@@ -1,0 +1,97 @@
+{
+ "version": 2,
+ "model": "logistic_regression",
+ "source": "UR Fall Detection Dataset (Kwolek & Kepski 2014, CC BY-NC-SA 4.0), cam0 RGB, MediaPipe pose_landmarker_lite",
+ "features": [
+  "torso_angle_end_deg",
+  "torso_angle_mean_deg",
+  "torso_ang_vel_deg_s",
+  "hip_vy_L_s",
+  "hip_acc_L_s2",
+  "hip_drop_L",
+  "bbox_aspect_w_over_h",
+  "head_hip_dy_L",
+  "hip_speed_last_half_L_s"
+ ],
+ "window_s": 1.0,
+ "min_frames": 5,
+ "min_span_s": 0.8,
+ "half_window_s": 0.5,
+ "landmark_ids": {
+  "nose": 0,
+  "shoulders": [
+   11,
+   12
+  ],
+  "hips": [
+   23,
+   24
+  ]
+ },
+ "input": "normalized x,y from PoseLandmarker; x multiplied by image width/height (aspect) before geometry; NaN frames forward-filled (causal)",
+ "mean": [
+  40.43443925227342,
+  34.64300473163381,
+  12.268622543872409,
+  0.2333782592454554,
+  0.012765146696564993,
+  0.22718246869006273,
+  0.8301435376673245,
+  0.5961128985609873,
+  1.0961377505900696
+ ],
+ "scale": [
+  49.31070041130355,
+  43.44915844821432,
+  41.64422880287167,
+  0.6304457848721869,
+  1.9984633077951957,
+  0.5811121538039288,
+  0.7149545257914534,
+  0.7826586482744108,
+  1.1379358516105826
+ ],
+ "coef": [
+  0.7140249795061184,
+  -0.9798735169075705,
+  0.5716415474399021,
+  -0.8565408885862491,
+  -0.06269652291357594,
+  1.3067540199201326,
+  0.8653508978876646,
+  0.38124183586129146,
+  0.38761770325830897
+ ],
+ "intercept": -0.5227172283476237,
+ "threshold": 0.75,
+ "refractory_s": 5.0,
+ "threshold_rule": "OOF over 70 sequences: among thresholds with false alarms/h <= 1.0 pick max sensitivity; if none, best event F1; threshold re-selected on gated OOF (ungated v1 threshold was 0.775)",
+ "cv_logreg": {
+  "sens": [
+   0.9333333333333333,
+   0.8333333333333334,
+   1.0
+  ],
+  "fa_per_h": [
+   192.60873872981273,
+   132.2023433537412,
+   252.81223321489992
+  ],
+  "f1": [
+   0.7368421052631579,
+   0.6585365853658537,
+   0.8108108108108109
+  ],
+  "lat_med": [
+   0.7000000000000001,
+   0.65,
+   0.7833333333333332
+  ]
+ },
+ "caveat": "lab dataset, side camera ~ waist height, 70 sequences; FA/h estimated from 0.093 h of negatives",
+ "descent_gate": {
+  "feature": "hip_drop_L",
+  "min": 0.1,
+  "rule": "alarm only if hip_drop_L (hip y at window end minus start, torso lengths, +y = down) > min; blocks a person already lying still (no descent in the window)"
+ }
+}

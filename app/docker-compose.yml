@@ -1,0 +1,36 @@
+name: kcf-app
+
+services:
+  backend:
+    build: ./backend
+    env_file: .env
+    environment:
+      KCF_DB_PATH: /var/lib/kcf/kcf.sqlite3
+      KCF_DATA_DIR: /data/cache
+      KCF_TRUST_PROXY: "true"
+      # Local planner/VLM run on the host (Ollama); the agent calls this container's own API for its tools.
+      KCF_OLLAMA_URL: ${KCF_OLLAMA_URL:-http://host.docker.internal:11434}
+      KCF_AGENT_SELF_URL: http://127.0.0.1:8000
+      KCF_WARMUP: ${KCF_WARMUP:-true}
+      KCF_OLLAMA_KEEP_ALIVE: ${KCF_OLLAMA_KEEP_ALIVE:-30m}
+    # host.docker.internal resolves on Docker Desktop/colima by itself; host-gateway makes it work on Linux too.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - kcf_db:/var/lib/kcf
+      - ../data/cache:/data/cache:ro
+    expose:
+      - "8000"
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_HOST_PORT:-8190}:8080"
+    restart: unless-stopped
+
+volumes:
+  kcf_db:

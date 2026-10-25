@@ -1,0 +1,460 @@
+{
+ "definitions": "unchanged: run_aed.py/aed_lib.py; public CA=심정지|호흡정지 & place notnull & !='집'; night=22-06 by gutHh; months Jan-Nov of each year; AED schedule = same single current registry snapshot (not year-specific) for both years",
+ "2024_reproduces_ledger": {
+  "night_share_matches_summary_json": true,
+  "n": 2534
+ },
+ "stats_2023_Jan_Nov": {
+  "n_public_ca": 2149,
+  "hourly": [
+   44,
+   43,
+   33,
+   37,
+   57,
+   78,
+   97,
+   135,
+   106,
+   120,
+   110,
+   147,
+   133,
+   112,
+   135,
+   109,
+   122,
+   122,
+   97,
+   82,
+   78,
+   69,
+   41,
+   42
+  ],
+  "night_share": [
+   0.17449976733364356,
+   0.15903740507987515,
+   0.19112379581850955,
+   375
+  ],
+  "weekday_share_arrests_when_open_lt_50pct": [
+   0.13448115402512797,
+   0.12070681969943929,
+   0.14955997559102704,
+   289
+  ],
+  "weekday_arrest_weighted_pct_open_night": 48.668742343149965,
+  "weekday_arrest_weighted_pct_open_day": 80.24108358746753,
+  "weekend_W1_as_reported_share_arrests_when_open_lt_50pct": [
+   0.12563983248022337,
+   0.11229093084095593,
+   0.14032477483845868,
+   270
+  ],
+  "weekend_W1_as_reported_arrest_weighted_pct_open_night": 50.931488910062356,
+  "weekend_W1_as_reported_arrest_weighted_pct_open_day": 62.71009374377338,
+  "weekend_W2_placeholder_as_weekday_share_arrests_when_open_lt_50pct": [
+   0.15914378780828292,
+   0.14428730804190054,
+   0.17521673721623643,
+   342
+  ],
+  "weekend_W2_placeholder_as_weekday_arrest_weighted_pct_open_night": 49.13160524983525,
+  "weekend_W2_placeholder_as_weekday_arrest_weighted_pct_open_day": 61.7525209807248,
+  "weekend_W3_placeholder_unknown_dropped_share_arrests_when_open_lt_50pct": [
+   0.14797580269892974,
+   0.13359150585245852,
+   0.16361642621277098,
+   318
+  ],
+  "weekend_W3_placeholder_unknown_dropped_arrest_weighted_pct_open_night": 49.974013821689326,
+  "weekend_W3_placeholder_unknown_dropped_arrest_weighted_pct_open_day": 61.9365254395255
+ },
+ "stats_2024_Jan_Nov": {
+  "n_public_ca": 2534,
+  "hourly": [
+   58,
+   48,
+   43,
+   42,
+   28,
+   87,
+   115,
+   120,
+   149,
+   150,
+   148,
+   160,
+   166,
+   154,
+   139,
+   130,
+   149,
+   137,
+   113,
+   102,
+   77,
+   78,
+   73,
+   68
+  ],
+  "night_share": [
+   0.17640094711917917,
+   0.1620530060100113,
+   0.19172856964073068,
+   447
+  ],
+  "weekday_share_arrests_when_open_lt_50pct": [
+   0.13575374901341752,
+   0.12296714424608435,
+   0.14964309273639714,
+   344
+  ],
+  "weekday_arrest_weighted_pct_open_night": 48.89601489373481,
+  "weekday_arrest_weighted_pct_open_day": 80.79966625012258,
+  "weekend_W1_as_reported_share_arrests_when_open_lt_50pct": [
+   0.11878453038674033,
+   0.10676071207024147,
+   0.13196246119636432,
+   301
+  ],
+  "weekend_W1_as_reported_arrest_weighted_pct_open_night": 51.395678794077355,
+  "weekend_W1_as_reported_arrest_weighted_pct_open_day": 62.69668882543888,
+  "weekend_W2_placeholder_as_weekday_share_arrests_when_open_lt_50pct": [
+   0.15430149960536702,
+   0.14076051325058941,
+   0.1688890724445935,
+   391
+  ],
+  "weekend_W2_placeholder_as_weekday_arrest_weighted_pct_open_night": 49.57640878870998,
+  "weekend_W2_placeholder_as_weekday_arrest_weighted_pct_open_day": 61.72027956402477,
+  "weekend_W3_placeholder_unknown_dropped_share_arrests_when_open_lt_50pct": [
+   0.13970007892659828,
+   0.12674646725822392,
+   0.15374448221632175,
+   354
+  ],
+  "weekend_W3_placeholder_unknown_dropped_arrest_weighted_pct_open_night": 50.44595937364789,
+  "weekend_W3_placeholder_unknown_dropped_arrest_weighted_pct_open_day": 61.90980542083892
+ },
+ "stats_2023_Jan_Dec_sensitivity": {
+  "n_public_ca": 2354,
+  "night_share": [
+   0.17587085811384875,
+   0.1610227357301807,
+   0.191775179108543,
+   414
+  ]
+ },
+ "comparison": {
+  "night_share": {
+   "2023": [
+    0.17449976733364356,
+    0.15903740507987515,
+    0.19112379581850955,
+    375
+   ],
+   "2024": [
+    0.17640094711917917,
+    0.1620530060100113,
+    0.19172856964073068,
+    447
+   ],
+   "diff_2023_minus_2024": -0.0019011797855356116,
+   "diff_ci95_newcombe": [
+    -0.02367319527859309,
+    0.020058367958846225
+   ],
+   "z": -0.1704201606240286,
+   "p_two_sided": 0.8646797181671024,
+   "ci_overlap": true,
+   "replicates_(p>=0.05)": true
+  },
+  "weekday_share_arrests_when_open_lt_50pct": {
+   "2023": [
+    0.13448115402512797,
+    0.12070681969943929,
+    0.14955997559102704,
+    289
+   ],
+   "2024": [
+    0.13575374901341752,
+    0.12296714424608435,
+    0.14964309273639714,
+    344
+   ],
+   "diff_2023_minus_2024": -0.0012725949882895493,
+   "diff_ci95_newcombe": [
+    -0.02083393837699675,
+    0.018497789967300223
+   ],
+   "z": -0.12692419974550223,
+   "p_two_sided": 0.8990003929128376,
+   "ci_overlap": true,
+   "replicates_(p>=0.05)": true
+  },
+  "weekend_W1_as_reported_share_arrests_when_open_lt_50pct": {
+   "2023": [
+    0.12563983248022337,
+    0.11229093084095593,
+    0.14032477483845868,
+    270
+   ],
+   "2024": [
+    0.11878453038674033,
+    0.10676071207024147,
+    0.13196246119636432,
+    301
+   ],
+   "diff_2023_minus_2024": 0.006855302093483034,
+   "diff_ci95_newcombe": [
+    -0.011902390605729042,
+    0.025834757801507624
+   ],
+   "z": 0.7144397049622311,
+   "p_two_sided": 0.47495532750745073,
+   "ci_overlap": true,
+   "replicates_(p>=0.05)": true
+  },
+  "weekend_W2_placeholder_as_weekday_share_arrests_when_open_lt_50pct": {
+   "2023": [
+    0.15914378780828292,
+    0.14428730804190054,
+    0.17521673721623643,
+    342
+   ],
+   "2024": [
+    0.15430149960536702,
+    0.14076051325058941,
+    0.1688890724445935,
+    391
+   ],
+   "diff_2023_minus_2024": 0.0048422882029159064,
+   "diff_ci95_newcombe": [
+    -0.01597866932522548,
+    0.025858901015900455
+   ],
+   "z": 0.454447471039947,
+   "p_two_sided": 0.6495067915931063,
+   "ci_overlap": true,
+   "replicates_(p>=0.05)": true
+  },
+  "weekend_W3_placeholder_unknown_dropped_share_arrests_when_open_lt_50pct": {
+   "2023": [
+    0.14797580269892974,
+    0.13359150585245852,
+    0.16361642621277098,
+    318
+   ],
+   "2024": [
+    0.13970007892659828,
+    0.12674646725822392,
+    0.15374448221632175,
+    354
+   ],
+   "diff_2023_minus_2024": 0.008275723772331461,
+   "diff_ci95_newcombe": [
+    -0.01182783958175573,
+    0.028583977246147665
+   ],
+   "z": 0.8049679899410559,
+   "p_two_sided": 0.4208381518453994,
+   "ci_overlap": true,
+   "replicates_(p>=0.05)": true
+  },
+  "night_share_2023_Jan_Dec_vs_2024_Jan_Nov": {
+   "2023": [
+    0.17587085811384875,
+    0.1610227357301807,
+    0.191775179108543,
+    414
+   ],
+   "2024": [
+    0.17640094711917917,
+    0.1620530060100113,
+    0.19172856964073068,
+    447
+   ],
+   "diff_2023_minus_2024": -0.0005300890053304141,
+   "diff_ci95_newcombe": [
+    -0.0218702565417758,
+    0.02088978121776901
+   ],
+   "z": -0.0486103266179918,
+   "p_two_sided": 0.961229840244558,
+   "ci_overlap": true,
+   "replicates_(p>=0.05)": true
+  }
+ },
+ "hourly_chi2_2023_vs_2024": {
+  "chi2": 36.767114809038034,
+  "p": 0.034385852624161294,
+  "dof": 23
+ },
+ "coverage": {
+  "2023": {
+   "rows_seoul_incident_all_12m": 599775,
+   "per_month": {
+    "202301": 47836,
+    "202302": 42120,
+    "202303": 47943,
+    "202304": 49884,
+    "202305": 54295,
+    "202306": 50849,
+    "202307": 55155,
+    "202308": 55177,
+    "202309": 51467,
+    "202310": 49178,
+    "202311": 44981,
+    "202312": 50890
+   },
+   "stations_per_month": {
+    "202301": 25,
+    "202302": 25,
+    "202303": 25,
+    "202304": 25,
+    "202305": 25,
+    "202306": 25,
+    "202307": 25,
+    "202308": 25,
+    "202309": 25,
+    "202310": 25,
+    "202311": 25,
+    "202312": 25
+   },
+   "ca_share": 0.022808553207452793,
+   "place_null_share_among_ca": 0.025950292397660817,
+   "place_values": [
+    "공장/산업/건설시설",
+    "기타",
+    "도로",
+    "도로외교통지역",
+    "바다/강/산/논밭",
+    "상업시설",
+    "오락/문화시설",
+    "운동시설",
+    "의료관련시설",
+    "일차산업장",
+    "집",
+    "집단거주시설",
+    "학교/교육시설"
+   ],
+   "hour_null_rows_excluded": null
+  },
+  "2024": {
+   "rows_seoul_incident_all_12m": 542477,
+   "per_month": {
+    "202401": 45372,
+    "202402": 40027,
+    "202403": 43041,
+    "202404": 44289,
+    "202405": 47109,
+    "202406": 47769,
+    "202407": 50601,
+    "202408": 53587,
+    "202409": 43902,
+    "202410": 42976,
+    "202411": 41711,
+    "202412": 42093
+   },
+   "stations_per_month": {
+    "202401": 25,
+    "202402": 25,
+    "202403": 25,
+    "202404": 25,
+    "202405": 25,
+    "202406": 25,
+    "202407": 25,
+    "202408": 25,
+    "202409": 25,
+    "202410": 25,
+    "202411": 25,
+    "202412": 23
+   },
+   "ca_share": 0.027219587189871643,
+   "place_null_share_among_ca": 0.039347148855478804,
+   "place_values": [
+    "공장/산업/건설시설",
+    "기타",
+    "도로",
+    "도로외교통지역",
+    "바다/강/산/논밭",
+    "상업시설",
+    "오락/문화시설",
+    "운동시설",
+    "의료관련시설",
+    "일차산업장",
+    "집",
+    "집단거주시설",
+    "학교/교육시설"
+   ],
+   "hour_null_rows_excluded": null
+  }
+ },
+ "raw_files": {
+  "2023": {
+   "files": 300,
+   "empty_files": [],
+   "rows_all_sido": 688722
+  },
+  "2024": {
+   "files": 298,
+   "empty_files": [],
+   "rows_all_sido": 627108
+  }
+ },
+ "fields_sample_gangnam_01": {
+  "2023": [
+   "cptcSeCdNm",
+   "egrcSidoCdNm",
+   "egrcSiggCdNm",
+   "emtpQlcClCd1Nm",
+   "emtpQlcClCd2Nm",
+   "emtpQlcClCd3Nm",
+   "frnrAt",
+   "gutHh",
+   "gutYm",
+   "ptntAge",
+   "ptntOccrTyCd1Nm",
+   "ptntOccrTyCd2Nm",
+   "ptntOccrTyCd3Nm",
+   "ptntSdtSeCdNm",
+   "rcptPathCdNm",
+   "rsacGutFsttOgidNm",
+   "ruptOccrPlcCdNm",
+   "ruptSptmCdNm",
+   "sidoHqOgidNm",
+   "sptMvmnDtc"
+  ],
+  "2024": [
+   "cptcSeCdNm",
+   "egrcSidoCdNm",
+   "egrcSiggCdNm",
+   "emtpQlcClCd1Nm",
+   "emtpQlcClCd2Nm",
+   "emtpQlcClCd3Nm",
+   "frnrAt",
+   "gutHh",
+   "gutYm",
+   "ptntAge",
+   "ptntOccrTyCd1Nm",
+   "ptntOccrTyCd2Nm",
+   "ptntOccrTyCd3Nm",
+   "ptntSdtSeCdNm",
+   "rcptPathCdNm",
+   "rsacGutFsttOgidNm",
+   "ruptOccrPlcCdNm",
+   "ruptSptmCdNm",
+   "sidoHqOgidNm",
+   "sptMvmnDtc"
+  ]
+ },
+ "fields_identical": true,
+ "audit_all_years": {
+  "files": 598,
+  "rows_pulled_all_sido": 1315830,
+  "rows_seoul_incident": 1142256,
+  "hour_missing": 4
+ }
+}

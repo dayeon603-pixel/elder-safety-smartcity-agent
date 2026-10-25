@@ -1,0 +1,76 @@
+@import "pretendard/dist/web/variable/pretendardvariable.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: "Pretendard Variable", Pretendard, system-ui, sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-surface-sunken text-body text-ink antialiased;
+    /* Hangul: break between words, not syllables. Tabular figures keep columns aligned. */
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    font-feature-settings: "tnum";
+  }
+  h1, h2, h3 { @apply font-semibold text-ink; text-wrap: balance; }
+  h1 { @apply text-h1; }
+  h2 { @apply text-h2; }
+  h3 { @apply text-h3; }
+  p { text-wrap: pretty; }
+  a { @apply text-accent underline underline-offset-2 decoration-accent/40; }
+  a:hover { @apply text-accent-strong decoration-accent-strong; }
+  :focus-visible { @apply outline outline-2 outline-offset-2 outline-accent; }
+  ::selection { @apply bg-accent/20; }
+  code, kbd { @apply font-mono text-small; }
+}
+
+@layer components {
+  .num { font-variant-numeric: tabular-nums; }
+  .eyebrow { @apply text-caption font-medium uppercase tracking-wider text-ink-faint; }
+}
+
+/* Motion is decoration only: turn it all off when the user asks. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Presentation mode on /field: larger type, dev details hidden. */
+.field-present .dev-only { display: none !important; }
+.field-present .text-caption { font-size: 0.9375rem; line-height: 1.4rem; }
+.field-present .text-small { font-size: 1.0625rem; line-height: 1.6rem; }
+.field-present .text-body { font-size: 1.1875rem; line-height: 1.75rem; }
+.field-present .text-h3 { font-size: 1.375rem; line-height: 1.9rem; }
+
+/* /twin control room: dark, restrained. Scoped to .twin so no other page changes. */
+.twin {
+  --cr-bg: #EEF1F5; --cr-panel: #FFFFFF; --cr-panel2: #F3F6FA; --cr-line: #D9DEE5; --cr-text: #1F2937; --cr-muted: #5B6676;
+  --cr-accent: #0F4C9A; --cr-ok: #2E9E5B; --cr-warn: #B7791F; --cr-bad: #D93025;
+  background: var(--cr-bg); color: var(--cr-text); font-feature-settings: "tnum";
+  font-family: "Apple SD Gothic Neo", "Pretendard Variable", Pretendard, system-ui, sans-serif; font-size: 15px;
+}
+.twin a { color: var(--cr-muted); text-decoration: none; }
+.twin a:hover { color: var(--cr-text); }
+.twin button { font: inherit; }
+.twin ::-webkit-scrollbar { width: 8px; height: 8px; }
+.twin ::-webkit-scrollbar-thumb { background: #C3CBD6; border-radius: 4px; }
+.twin-cam .bg-surface-inset, .twin-cam .bg-surface-sunken { background: #F3F6FA; border-color: var(--cr-line); }
+.twin-cam .text-ink-muted, .twin-cam .text-ink-faint, .twin-cam .text-small { color: var(--cr-muted); }
+.twin-cam .border-line { border-color: var(--cr-line); }
+.twin-cam button { background: #fff; color: var(--cr-text); border: 1px solid #C9D1DB; min-height: 0; padding: 4px 12px; font-size: 14px; }
+.twin-cam button:hover { background: #E8EEF6; }
+.twin-cam canvas { max-height: 100%; width: 100%; object-fit: contain; }
+@keyframes twin-alert { 0%,100% { box-shadow: inset 0 0 0 2px rgba(255,90,90,.9); } 50% { box-shadow: inset 0 0 0 2px rgba(255,90,90,.25); } }
+.twin-alert { animation: twin-alert 1.1s ease-in-out infinite; }
+
+.twin h1, .twin h2, .twin h3 { color: inherit; }
+.twin-cam > div { width: 100%; }
+@keyframes twin-swap { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.twin-swap { animation: twin-swap 420ms ease-out; }

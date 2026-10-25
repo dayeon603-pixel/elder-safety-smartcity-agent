@@ -1,0 +1,15 @@
+.venv
+var
+**/__pycache__
+.pytest_cache
+.mypy_cache
+.ruff_cache
+tests
+experiments
+!experiments/heat/build_panel.py
+!experiments/heat/common.py
+!experiments/heat/weather_hub.py
+!experiments/heat/out/results.json
+!experiments/heat/out/results_tmax_sensitivity.json
+!experiments/heat/out/crosswalk_heat_to_2026.csv
+figures
