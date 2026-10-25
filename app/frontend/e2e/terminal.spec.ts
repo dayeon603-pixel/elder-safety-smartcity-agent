@@ -8,6 +8,7 @@ const HERE = fileURLToPath(new URL(".", import.meta.url));
 const BACKEND = process.env.TERMINAL_BACKEND_URL ?? "http://127.0.0.1:8010";
 const TOKEN_HEADER = "X-Demo-Token";
 const SHOT_DIR = resolve(HERE, "../screenshots");
+const SETTLE_MS = 1500;
 const VIEWPORTS = [
   { name: "phone", width: 390, height: 844 },
   { name: "tablet", width: 1180, height: 820 },
@@ -139,3 +140,46 @@ for (const vp of VIEWPORTS) {
     });
   });
 }
+
+test.describe("terminal phone view (재난문자 dialog)", () => {
+  test.use({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, hasTouch: true, isMobile: true });
+
+  test("one-time 알림 받기 켜기, 훈련-marked dialog, 확인 dismisses", async ({ page, request }) => {
+    await page.addInitScript(() => { (window as unknown as { __vib: number[][] }).__vib = []; navigator.vibrate = ((p: unknown) => { (window as unknown as { __vib: number[][] }).__vib.push(p as number[]); return true; }) as typeof navigator.vibrate; });
+    await publish(request, { kind: "clear", title: "안전합니다", body: "이제 괜찮습니다" });
+    await page.goto("/terminal?view=phone");
+    await page.getByRole("button", { name: "알림 받기 켜기" }).click();
+    await expect(page.getByTestId("terminal-idle")).toBeVisible();
+    await publish(request, { kind: "heat", title: "관악구 폭염 주의 · 에이전트 권고", body: "특보 기준에는 못 미치지만 관악구는 오늘 온열질환 위험이 높습니다. 65세 이상은 12~17시 외출을 피하고 물을 자주 드세요." });
+    const dlg = page.getByTestId("phone-alert");
+    await expect(dlg).toHaveAttribute("data-class", "safety");
+    await expect(page.getByTestId("phone-header")).toHaveText("[훈련] 안전 안내 문자");
+    await expect(page.getByTestId("phone-sender")).toHaveText(/\(시연\)$/);
+    await expect(page.getByTestId("phone-body")).toContainText("[훈련] 관악구 폭염 주의 · 에이전트 권고.");
+    await expect(page.getByTestId("drill-watermark")).toBeAttached();
+    expect(await page.evaluate(() => (window as unknown as { __vib: number[][] }).__vib.length)).toBeGreaterThan(0);
+    await expectNoScroll(page);
+    await page.waitForTimeout(SETTLE_MS); // let the entry fade finish so the shot shows the settled screen
+    await page.screenshot({ path: `${SHOT_DIR}/terminal-phone-alert.png` });
+    await page.getByTestId("phone-ok").click();
+    await expect(dlg).toHaveCount(0);
+    await expect(page.getByTestId("terminal-idle")).toBeVisible();
+  });
+});
+
+test.describe("terminal stop view (BIT banner)", () => {
+  test.use({ viewport: { width: 1180, height: 820 } });
+
+  test("LED banner carries [훈련] and the (시연) sender", async ({ page, request }) => {
+    await publish(request, { kind: "clear", title: "안전합니다", body: "이제 괜찮습니다" });
+    await page.goto("/terminal");
+    await page.getByTestId("terminal-start").click();
+    await expect(page.getByTestId("terminal-idle")).toBeVisible();
+    await publish(request, { kind: "heat", title: "관악구 폭염 주의 · 에이전트 권고", body: "특보 기준에는 못 미치지만 오늘 온열질환 위험이 높습니다. 외출을 피하고 물을 자주 드세요." });
+    await expect(page.getByTestId("terminal-banner")).toContainText("[훈련]");
+    await expect(page.getByTestId("terminal-banner")).toContainText("(시연)");
+    await expectNoScroll(page);
+    await page.waitForTimeout(SETTLE_MS); // let the entry fade finish so the shot shows the settled screen
+    await page.screenshot({ path: `${SHOT_DIR}/terminal-stop-alert.png` });
+  });
+});

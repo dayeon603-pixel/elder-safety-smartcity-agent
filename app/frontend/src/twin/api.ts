@@ -2,9 +2,10 @@
 import { demoHeaders } from "../api/agent";
 import { API_BASE } from "../api/client";
 import { clockKst } from "./clock";
+import { IS_STATIC, staticSceneUrl } from "../static/mode";
 import { FORBIDDEN_SOURCE_RE, SILVER_RADIUS_FALLBACK_M, TWIN_SGG_CODE } from "./constants";
 import type {
-  AccidentPoint, ActionCard, CardLetter, EffectChip, Letter, ActionsView, AedCandidate, AedPoint, CrosswalkPoint, EvidenceRow, DayType, HeatSummary, LonLat,
+  AccidentPoint, ActionCard, CardLetter, SignalItem, EffectChip, Letter, ActionsView, AedCandidate, AedPoint, CrosswalkPoint, EvidenceRow, DayType, HeatSummary, LonLat,
   RainDay, ShelterPoint, SilverEval, SilverSite, StopPoint, TwinRoute, TwinState, WeatherNow,
 } from "./types";
 
@@ -68,7 +69,7 @@ export function daytypeOf(date: string, holiday: boolean = false): DayType {
 }
 
 /** Scene endpoint (the dev fixture fallback was removed when the endpoint landed). */
-export const sceneUrls = (code: string): string[] => [`${API_BASE}/twin/${code}/scene`];
+export const sceneUrls = (code: string): string[] => (IS_STATIC ? [staticSceneUrl(code)] : [`${API_BASE}/twin/${code}/scene`]);
 
 // ---------- state ----------
 
@@ -257,6 +258,15 @@ function evidenceRows(v: unknown): EvidenceRow[] {
   });
 }
 
+function signalItems(v: unknown): SignalItem[] {
+  return mapList(v, (o) => {
+    const p = pt(o);
+    const g = num(o.green_s);
+    const r = num(o.required_green_s);
+    return p === null || g === null || r === null ? null : { id: str(o.crosswalk_id) ?? "", address: str(o.address) ?? "", ...p, green: g, required: r };
+  });
+}
+
 function draftsOf(v: unknown): ActionCard["drafts"] {
   return mapList(v, (o) => {
     const text = str(o.text);
@@ -273,9 +283,23 @@ export async function loadActions(date: string, hour: number, code: string = TWI
     const title = str(o.title);
     if (id === null || title === null) return null;
     const ref = rec(o.feedback_ref);
-    return { id, kind: str(o.kind) ?? "", title, summary: str(o.body) ?? "", evidence: evidenceRows(o.evidence), feedbackId: str(ref?.action_id) ?? id, capUrl: str(o.cap_url), lat: num(o.lat), lon: num(o.lon), chars: str(o.chars), destination: str(rec(o.destination)?.label) ?? str(o.destination), destinationOrg: str(rec(o.destination)?.org), documentUrl: str(o.document_url), flowNote: str(o.flow_note), evidenceText: str(o.evidence_text), audioUrl: str(o.audio_url), drafts: draftsOf(o.drafts) };
+    return { id, kind: str(o.kind) ?? "", title, summary: str(o.body) ?? "", evidence: evidenceRows(o.evidence), feedbackId: str(ref?.action_id) ?? id, capUrl: str(o.cap_url), lat: num(o.lat), lon: num(o.lon), chars: str(o.chars), destination: str(rec(o.destination)?.label) ?? str(o.destination), destinationOrg: str(rec(o.destination)?.org), documentUrl: str(o.document_url), flowNote: str(o.flow_note), evidenceText: str(o.evidence_text), audioUrl: str(o.audio_url), gain: num(o.gain_p65_2min), items: signalItems(o.items), drafts: draftsOf(o.drafts) };
   });
   return { cards, night: raw.night === true, notes: arr(raw.notes).filter((n): n is string => typeof n === "string"), disclaimer: str(raw.disclaimer), date, hour, generatedAt: clockKst() };
+}
+
+/** 보행신호 연장 협의 card of an adjacent 구 (관악구 has no crosswalk whose green time is short), labelled as such. */
+export async function loadNeighborSignals(date: string, hour: number, code: string): Promise<ActionCard | null> {
+  try {
+    const raw = rec(await getJson(`/twin/${code}/actions?date=${date}&hour=${hour}`));
+    const region = str(raw?.region)?.replace(/^서울특별시\s*/, "") ?? code;
+    const view = await loadActions(date, hour, code);
+    const card = view.cards.find((c) => c.id === "signals");
+    return card === undefined || card.items.length === 0 ? null : { ...card, evidence: [...card.items.slice(0, 5).map((x) => ({ label: x.address.replace(/^서울특별시\s*/, ""), value: `녹색 ${x.green}초 < 필요 ${x.required}초 (0.7 m/s)`, source: "전국 횡단보도 표준데이터" })), ...card.evidence], id: `signals@${code}`, title: `인접 ${region} · ${card.title}`, feedbackId: "signals" };
+  } catch (e) {
+    if (e instanceof Error) return null;
+    throw e;
+  }
 }
 
 /** "149/157" -> {length, limit}. */

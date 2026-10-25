@@ -2,21 +2,32 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactElement } from "react";
 import { useSearchParams } from "react-router-dom";
 import { API_BASE } from "../api/client";
-import { AlertScreen, ConnectionDot, IdleScreen, StartScreen, themeVars } from "../components/terminal/TerminalScreens";
-import { CLEAR_HOLD_MS, FLASH_PERIOD_MS, FLASH_PULSES, REPLAY_SILENT_AFTER_MS, VIBRATE_DEFAULT, VIBRATE_FALL } from "../lib/terminal/config";
+import { AlertScreen, ConnectionDot, IdleScreen, PhoneAlert, PhoneIdle, PhoneStartScreen, StartScreen, themeVars } from "../components/terminal/TerminalScreens";
+import { CLASS_PRESENTATION, classOf, formatAlertTime, formatLockDate, senderOf } from "../lib/terminal/alertClass";
+import { CLEAR_HOLD_MS, FLASH_PERIOD_MS, FLASH_PULSES, REPLAY_SILENT_AFTER_MS, TERMINAL_DEFAULT_GU, TERMINAL_TZ } from "../lib/terminal/config";
 import { formatClock, useClock, useFullscreenRequest, useIdleData, useStop, useStream, useWakeLock } from "../lib/terminal/hooks";
-import { addressedTo, messageAgeMs, resolveAudioUrl } from "../lib/terminal/message";
+import { addressedTo, messageAgeMs, messageKey, resolveAudioUrl } from "../lib/terminal/message";
+import { AlertTone } from "../lib/terminal/tone";
 import type { StreamEvent, TerminalMessage } from "../lib/terminal/types";
 import { VoicePlayer } from "../lib/terminal/voice";
 import type { VoiceState } from "../lib/terminal/voice";
 
 const STOP_PARAM = "stop";
+/** `?view=phone` renders the 재난문자 phone dialog; anything else is the 정류장 단말 (BIT). */
+const VIEW_PARAM = "view";
+
+export type TerminalView = "phone" | "stop";
 
 /** 현장 단말: a bus-stop terminal / 마을방송 speaker. One full-screen page, no chrome, no scrolling. */
 export function TerminalPage(): ReactElement {
   const [params] = useSearchParams();
   const stopState = useStop(params.get(STOP_PARAM));
   const stop = stopState.status === "ready" ? stopState.stop : null;
+  const view: TerminalView = params.get(VIEW_PARAM) === "phone" ? "phone" : "stop";
+  const sender = senderOf(stop, TERMINAL_DEFAULT_GU);
+  const toneRef = useRef<AlertTone | null>(null);
+  const [dismissed, setDismissed] = useState<string | null>(null);
+  const [receivedAt, setReceivedAt] = useState<Date>(() => new Date());
 
   const [started, setStarted] = useState(false);
   const startedRef = useRef(false);
@@ -49,11 +60,16 @@ export function TerminalPage(): ReactElement {
     // A "clear" that is a replay (or old, or arrived before the operator tapped start) has nothing left to say: show idle.
     const clearIsHistory = m.kind === "clear" && (ev.replay || stale || !startedRef.current || (age !== null && age > CLEAR_HOLD_MS));
     setCurrent(clearIsHistory ? null : m);
+    setReceivedAt(m.published_at !== null && !Number.isNaN(Date.parse(m.published_at)) ? new Date(m.published_at) : new Date());
     const silent = ev.replay || !startedRef.current || stale;
     if (m.kind === "clear") player().cancel();
     if (silent) return;
-    if (m.kind !== "clear") speak(m);
-    if (typeof navigator.vibrate === "function") navigator.vibrate([...(m.kind === "fall" ? VIBRATE_FALL : VIBRATE_DEFAULT)]);
+    const cls = classOf(m);
+    if (typeof navigator.vibrate === "function") navigator.vibrate([...CLASS_PRESENTATION[cls].vibrate]);
+    // Generated alert tone first, then the voice (so the two never talk over each other).
+    const tone = toneRef.current;
+    const toneDone = tone === null ? Promise.resolve() : tone.play(cls);
+    if (m.kind !== "clear") void toneDone.then(() => speak(m));
   }, [stop, speak, player]);
 
   const conn = useStream(stop?.stop_id ?? null, onEvent);
@@ -78,10 +94,12 @@ export function TerminalPage(): ReactElement {
     startedRef.current = true;
     setStarted(true);
     void player().unlock();
+    if (toneRef.current === null) toneRef.current = new AlertTone();
+    toneRef.current.unlock();
     void requestFullscreen();
   }, [player, requestFullscreen]);
 
-  useEffect(() => () => playerRef.current?.cancel(), []);
+  useEffect(() => () => { playerRef.current?.cancel(); toneRef.current?.close(); }, []);
 
   // No scrolling, ever (iOS rubber-band included).
   useEffect(() => {
@@ -101,6 +119,21 @@ export function TerminalPage(): ReactElement {
       </div>
     );
   }
+  if (view === "phone") {
+    const show = started && current !== null && dismissed !== messageKey(current);
+    return (
+      <div className="tm-root ph-root" data-testid="terminal-root" data-view="phone" data-kind={kind}>
+        {!started ? (
+          <PhoneStartScreen sender={sender} onStart={onStart} />
+        ) : show ? (
+          <PhoneAlert message={current} sender={sender} time={formatAlertTime(receivedAt, TERMINAL_TZ)} onOk={() => { player().cancel(); setDismissed(messageKey(current)); }} />
+        ) : (
+          <PhoneIdle clock={formatClock(clock)} date={formatLockDate(clock, TERMINAL_TZ)} sender={sender} />
+        )}
+        {started && <ConnectionDot state={conn} />}
+      </div>
+    );
+  }
   if (!started) {
     return (
       <div className="tm-root" style={themeVars("idle")} data-testid="terminal-root">
@@ -109,12 +142,12 @@ export function TerminalPage(): ReactElement {
     );
   }
   return (
-    <div className="tm-root" style={theme} data-testid="terminal-root" data-kind={kind}>
+    <div className="tm-root" style={theme} data-testid="terminal-root" data-kind={kind} data-view="stop">
       <ConnectionDot state={conn} />
       {current === null ? (
         <IdleScreen stop={stopState.stop} clock={formatClock(clock)} data={idle} wakeUnsupported={wake === "unsupported"} />
       ) : (
-        <AlertScreen message={current} voice={voice} flash={flashOn} onTap={() => speak(current)} />
+        <AlertScreen message={current} voice={voice} flash={flashOn} sender={sender} onTap={() => speak(current)} />
       )}
     </div>
   );

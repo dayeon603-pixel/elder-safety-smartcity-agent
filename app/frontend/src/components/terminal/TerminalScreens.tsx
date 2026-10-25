@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactElement } from "react";
 import { DRILL_TAG, FLASH_PERIOD_MS, FLASH_PULSES } from "../../lib/terminal/config";
+import { CLASS_PRESENTATION, DRILL_PREFIX, DRILL_WATERMARK, classOf, smsText } from "../../lib/terminal/alertClass";
 import { KIND_DEFAULT_TEXT, KIND_STYLE } from "../../lib/terminal/present";
 import type { ConnectionState, IdleData, NearPlace, StopInfo, TerminalKind, TerminalMessage } from "../../lib/terminal/types";
 import type { VoiceState } from "../../lib/terminal/voice";
@@ -42,24 +43,90 @@ export function KindIcon({ kind }: { kind: TerminalKind }): ReactElement {
   );
 }
 
-export function AlertScreen({ message, voice, flash, onTap }: { message: TerminalMessage; voice: VoiceState; flash: boolean; onTap: () => void }): ReactElement {
+/** 정류장 단말(BIT) alert: LED-style amber/red on black, one bounded blink of the class banner, one scrolling ticker line. */
+export function AlertScreen({ message, voice, flash, onTap, sender = "관악구(시연)" }: { message: TerminalMessage; voice: VoiceState; flash: boolean; onTap: () => void; sender?: string }): ReactElement {
   const fallback = KIND_DEFAULT_TEXT[message.kind];
   const title = message.title || fallback.title;
   const body = message.body || fallback.body;
+  const cls = CLASS_PRESENTATION[classOf(message)];
+  const ticker = smsText(sender, title, body);
   return (
     <>
       {flash && <div className="tm-flash" aria-hidden="true" data-testid="terminal-flash" />}
-      <div className="tm-alert" role="alert" data-testid="terminal-alert" data-kind={message.kind}>
-        <KindIcon kind={message.kind} />
-        <div>
-          <div className="tm-title" data-testid="terminal-title">{title}</div>
-          <div className="tm-body" data-testid="terminal-body">{body}</div>
-          {(voice === "blocked" || voice === "failed") && <div className="tm-sound">화면을 누르면 음성이 나옵니다</div>}
-          <div className="tm-tag">{DRILL_TAG}</div>
+      <div className="tm-alert tm-bit" role="alert" data-testid="terminal-alert" data-kind={message.kind} data-class={classOf(message)}>
+        <div className={`tm-bit-banner${flash ? " is-blink" : ""}`} data-testid="terminal-banner">
+          <span className="tm-bit-drill">{DRILL_PREFIX}</span>
+          <span>{message.kind === "clear" ? "안내 해제" : cls.short}</span>
+          <span className="tm-bit-sender">{sender}</span>
         </div>
+        <div className="tm-bit-main">
+          <KindIcon kind={message.kind} />
+          <div className="tm-bit-text">
+            <div className="tm-title" data-testid="terminal-title">{title}</div>
+            <div className="tm-body" data-testid="terminal-body">{body}</div>
+            {(voice === "blocked" || voice === "failed") && <div className="tm-sound">화면을 누르면 음성이 나옵니다</div>}
+          </div>
+        </div>
+        <div className="tm-bit-ticker" aria-hidden="true"><span>{ticker}</span><span>{ticker}</span></div>
+        <div className="tm-tag">{DRILL_TAG}</div>
       </div>
       <button type="button" className="tm-replay" onClick={onTap} aria-label="음성 다시 듣기" data-testid="terminal-replay" />
     </>
+  );
+}
+
+/** Persistent diagonal watermark over the whole phone screen. */
+export function DrillWatermark(): ReactElement {
+  return (
+    <div className="ph-watermark" aria-hidden="true" data-testid="drill-watermark">
+      {Array.from({ length: 8 }, (_, i) => <span key={i}>{DRILL_WATERMARK}</span>)}
+    </div>
+  );
+}
+
+export function PhoneStartScreen({ sender, onStart }: { sender: string; onStart: () => void }): ReactElement {
+  return (
+    <div className="ph-start">
+      <DrillWatermark />
+      <div className="ph-start-card">
+        <div className="ph-start-title">재난문자 수신 시연</div>
+        <p className="ph-start-text">{sender} 훈련 문자를 이 화면에서만 보여 줍니다. 실제 문자·OS 알림은 보내지 않습니다.</p>
+        <button type="button" className="ph-start-btn" onClick={onStart} data-testid="terminal-start">알림 받기 켜기</button>
+        <p className="ph-start-hint">한 번 누르면 알림음과 진동이 켜집니다</p>
+      </div>
+    </div>
+  );
+}
+
+export function PhoneIdle({ clock, date, sender }: { clock: { ampm: string; time: string }; date: string; sender: string }): ReactElement {
+  return (
+    <div className="ph-idle" data-testid="terminal-idle">
+      <DrillWatermark />
+      <div className="ph-lock-date">{date}</div>
+      <div className="ph-lock-time">{clock.time}</div>
+      <div className="ph-lock-note">{sender} 훈련 문자 대기 중</div>
+    </div>
+  );
+}
+
+const WARN_ICON = (<svg viewBox="0 0 24 24" aria-hidden="true" className="ph-icon"><path d="M12 2.5 23 21.5H1Z" fill="currentColor" /><path d="M12 9v6M12 17.6v.4" stroke="var(--ph-accent)" strokeWidth="2.4" strokeLinecap="round" /></svg>);
+
+/** Full-screen 재난문자 dialog: class header, sender, time, body, 확인. */
+export function PhoneAlert({ message, sender, time, onOk }: { message: TerminalMessage; sender: string; time: string; onOk: () => void }): ReactElement {
+  const fallback = KIND_DEFAULT_TEXT[message.kind];
+  const cls = CLASS_PRESENTATION[classOf(message)];
+  const text = smsText(sender, message.title || fallback.title, message.body || fallback.body);
+  return (
+    <div className="ph-backdrop" style={{ "--ph-accent": cls.accent, "--ph-on-accent": cls.onAccent } as CSSProperties}>
+      <DrillWatermark />
+      <div className="ph-dialog" role="alertdialog" aria-modal="true" aria-labelledby="ph-header" aria-describedby="ph-body" data-testid="phone-alert" data-kind={message.kind} data-class={classOf(message)}>
+        <div className="ph-header" id="ph-header" data-testid="phone-header">{WARN_ICON}<span>{DRILL_PREFIX} {cls.header}</span></div>
+        <div className="ph-meta"><span data-testid="phone-sender">{sender}</span><span>{time}</span></div>
+        <div className="ph-body" id="ph-body" data-testid="phone-body">{text}</div>
+        <div className="ph-drill">{DRILL_WATERMARK}</div>
+        <button type="button" className="ph-ok" onClick={onOk} data-testid="phone-ok">확인</button>
+      </div>
+    </div>
   );
 }
 

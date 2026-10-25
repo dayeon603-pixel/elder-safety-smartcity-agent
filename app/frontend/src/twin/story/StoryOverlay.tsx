@@ -5,6 +5,7 @@ import type { TwinEngine } from "../engine";
 import type { TwinCtl } from "../useTwin";
 import { bindStory } from "./bind";
 import { StoryController } from "./controller";
+import type { PosterCfg } from "./poster";
 import type { StorySnapshot } from "./controller";
 import { ATTRIBUTION, basemapStatus } from "../basemap/store";
 import { BUTTON_DEMO_LABEL, CAMERA_LABEL, MODEL_CREDIT, PASSERBY_LABEL, PERSON_LABEL, POP_LEGEND_SOURCE, POP_PENDING_TEXT, RUN_BASIS, SCALE_NOTE, TRAINING, WALK_BASIS } from "./constants";
@@ -39,6 +40,7 @@ export function useStoryController(engineRef: MutableRefObject<TwinEngine | null
     controller.setInputs({ scene: ctl.scene.scene, state: ctl.state, date: ctl.date, hour: ctl.hour, place: p === null ? null : { lat: p.lat, lon: p.lon, label: p.label, crosswalkId: p.crosswalkId }, triggerFall });
   }, [controller, ctl.scene, ctl.state, ctl.date, ctl.hour, ctl.place, triggerFall]);
   useEffect(() => {
+    (window as unknown as { __poster?: unknown }).__poster = { set: (cfg: PosterCfg | null) => controller.setPoster(cfg) };
     (window as unknown as { __basemap?: unknown }).__basemap = { status: () => basemapStatus.get() };
     (window as unknown as { __story?: unknown }).__story = {
       start: () => controller.start(), stop: () => controller.stop(), fall: () => controller.fallByButton(), snapshot: () => controller.getSnapshot(), frontCam: (on: boolean) => { controller.frontCam = on; },
@@ -115,7 +117,7 @@ export function StoryOverlay({ controller, ctl }: { controller: StoryController;
       </div>
 
       <Legend s={s} controller={controller} />
-      <p className="pointer-events-none absolute bottom-1 right-3 m-0 rounded bg-white/80 px-1.5 text-[12px] text-[#3a4452]" data-testid="map-attribution" data-ground={ground.mode}>{ATTRIBUTION[ground.mode]}</p>
+      <p className="pointer-events-none absolute bottom-1 right-3 m-0 rounded bg-white/80 px-1.5 text-[13px] text-[#3a4452]" data-testid="map-attribution" data-ground={ground.mode}>{ATTRIBUTION[ground.mode]}</p>
 
       {s.active && (
         <div className="absolute bottom-9 left-3 max-w-[600px]">
@@ -126,16 +128,16 @@ export function StoryOverlay({ controller, ctl }: { controller: StoryController;
                 {s.phase === "arrived" ? <>③ 정류장 도착 · 안내단말 확인</> : null}
                 {fallen ? <>④ 사고 대응 · 횡단보도 낙상 · {s.fallSource === "button" ? BUTTON_DEMO_LABEL : CAMERA_LABEL}</> : null}
               </span>
-              {!fallen && <button type="button" onClick={() => controller.fallByButton()} data-testid="story-fall-btn" className="h-6 shrink-0 rounded border border-[#E8A5A5] bg-[#FDECEC] px-2 text-[12px] font-semibold text-[#C62828]">{BUTTON_DEMO_LABEL}: 낙상</button>}
-              {fallen && ctl.fall.status === "pending" && <button type="button" onClick={() => ctl.confirmFall()} data-testid="story-confirm-btn" className="h-6 shrink-0 rounded border border-[#D9DEE5] bg-[#EEF3FA] px-2 text-[12px] font-semibold text-[#1F2937]">관제요원 확인(훈련)</button>}
-              <button type="button" onClick={() => controller.stop()} data-testid="story-exit" className="h-6 shrink-0 rounded border border-[#D9DEE5] px-2 text-[12px] font-normal text-[#5B6676]">관제 시점 (Esc)</button>
+              {!fallen && <button type="button" onClick={() => controller.fallByButton()} data-testid="story-fall-btn" className="h-6 shrink-0 rounded border border-[#E8A5A5] bg-[#FDECEC] px-2 text-[13px] font-semibold text-[#C62828]">{BUTTON_DEMO_LABEL}: 낙상</button>}
+              {fallen && ctl.fall.status === "pending" && <button type="button" onClick={() => ctl.confirmFall()} data-testid="story-confirm-btn" className="h-6 shrink-0 rounded border border-[#D9DEE5] bg-[#EEF3FA] px-2 text-[13px] font-semibold text-[#1F2937]">관제요원 확인(훈련)</button>}
+              <button type="button" onClick={() => controller.stop()} data-testid="story-exit" className="h-6 shrink-0 rounded border border-[#D9DEE5] px-2 text-[13px] font-normal text-[#5B6676]">관제 시점 (Esc)</button>
             </p>
-            <p className="m-0 text-[12.5px] leading-[18px] text-[#5B6676]">
+            <p className="m-0 text-[13px] leading-[18px] text-[#5B6676]">
               {s.speedup !== null && !fallen ? <>×{s.speedup} 배속 · 실제 0.7 m/s로는 {s.walkRealSec === null ? "" : fmtMin(s.walkRealSec)} · </> : null}
               {s.run !== null ? <span data-testid="story-run" className="text-[#1F2937]">{PASSERBY_LABEL} 왕복 {(2 * s.run.meters).toFixed(0)} m ÷ 1.2 m/s = <b className="num">{s.run.totalRealSec.toFixed(0)}</b>초 · ×{s.speedup} 배속 · <span className="num" ref={clockRef}>0 / {s.run.totalRealSec.toFixed(0)}초</span> · </span> : null}
               {PERSON_LABEL}은 가상 · {SCALE_NOTE}
             </p>
-            <div className="hidden text-[12.5px] leading-[18px] text-[#5B6676] group-hover:block" data-testid="story-hud-detail">
+            <div className="hidden text-[13px] leading-[18px] text-[#5B6676] group-hover:block" data-testid="story-hud-detail">
               <p className="m-0">{WALK_BASIS}{s.lengthM === null ? "" : ` · 경로 ${s.lengthM.toFixed(0)} m`} · {MODEL_CREDIT}</p>
               {s.run !== null && <p className="m-0">{RUN_BASIS} · 열린 AED {s.run.aedName}</p>}
               {fallen && <p className="m-0" data-testid="story-fall-status">{ctl.fall.routeText !== null ? `열린 AED 경로 ${ctl.fall.routeText} · ` : ""}{ctl.fall.status === "pending" ? "관제요원 확인 대기" : ctl.fall.status === "running" ? "119 연계 진행(시뮬레이터)" : ctl.fall.publishText ?? ""}{` · ${TRAINING}`}</p>}
@@ -176,13 +178,13 @@ export function StoryOverlay({ controller, ctl }: { controller: StoryController;
 
 function TerminalCard({ stopName, title, body, docked = false }: { stopName: string | null; title: string; body: string; docked?: boolean }) {
   return (
-    <div className={`${docked ? "w-[300px]" : "mb-3 w-[380px] shadow-[0_0_36px_rgba(255,212,121,0.35)]"} overflow-hidden rounded-md border-2 border-[#7d93ab] bg-[#05090d]`} data-testid="story-terminal">
-      <div className="flex items-center justify-between bg-[#16324d] px-3 py-1 text-[12.5px] text-[#cfe3f7]"><span className="truncate">정류장 안내단말{stopName === null ? "" : ` · ${stopName}`}</span><span className="shrink-0 pl-2">{docked ? "정류장(화면 밖)" : "장면 안"}</span></div>
-      <div className="px-3 py-2">
-        <p className={`m-0 font-bold leading-6 text-[#ffd479] ${docked ? "text-[17px]" : "text-[21px]"}`} data-testid="story-terminal-title">{title}</p>
-        <p className={`m-0 mt-1 leading-[22px] text-[#e8eef5] ${docked ? "text-[13.5px]" : "text-[16px]"}`} data-testid="story-terminal-body">{body}</p>
+    <div className={`${docked ? "w-[300px]" : "mb-3 w-[380px] shadow-[0_0_36px_rgba(255,138,31,0.45)]"} overflow-hidden rounded-md border-[3px] border-[#2a2a2a] bg-black`} data-testid="story-terminal">
+      <div className="flex items-center gap-2 bg-[#a00018] px-3 py-1 text-[13px] font-bold text-white"><span className="shrink-0 rounded-sm bg-white px-1 text-[#a00018]">[훈련]</span><span className="truncate">정류장 안내단말{stopName === null ? "" : ` · ${stopName}`}</span><span className="ml-auto shrink-0 pl-2 font-normal">{docked ? "정류장(화면 밖)" : "장면 안"}</span></div>
+      <div className="px-3 py-2 [background-image:radial-gradient(rgba(255,255,255,0.05)_30%,transparent_33%)] [background-size:4px_4px]">
+        <p className={`m-0 font-extrabold leading-6 text-[#ff8a1f] [text-shadow:0_0_8px_rgba(255,138,31,0.6)] ${docked ? "text-[17px]" : "text-[22px]"}`} data-testid="story-terminal-title">{title}</p>
+        <p className={`m-0 mt-1 font-semibold leading-[22px] text-[#ffc23d] [text-shadow:0_0_6px_rgba(255,194,61,0.45)] ${docked ? "text-[13.5px]" : "text-[16px]"}`} data-testid="story-terminal-body">{body}</p>
       </div>
-      <p className="m-0 border-t border-[#1e2c3a] px-3 py-0.5 text-[11.5px] text-[#8fa3b8]">/terminal 과 같은 메시지 · {TRAINING}</p>
+      <p className="m-0 border-t border-[#3a2a00] px-3 py-0.5 text-[13px] text-[#d9d9d9]">휴대폰 화면과 같은 안내 · {TRAINING}</p>
     </div>
   );
 }

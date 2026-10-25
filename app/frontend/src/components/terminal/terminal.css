@@ -76,3 +76,58 @@
 .tm-alert, .tm-idle { animation: tm-in 340ms ease-out; }
 @keyframes tm-in { from { opacity: 0; transform: translateY(1.2vmin); } to { opacity: 1; transform: none; } }
 .tm-start-hint { white-space: nowrap; font-size: clamp(1.125rem, 3.6vmin, 2rem); }
+
+/* ---------- 정류장 단말 (BIT) alert: LED board look. No national BIT disaster-display standard was found (ALERT_FORMAT.md §4). ---------- */
+.tm-bit { position: relative; flex-direction: column !important; align-items: stretch; justify-content: flex-start; gap: 2vmin; text-align: left !important; font-family: "Pretendard Variable", Pretendard, system-ui, sans-serif; }
+.tm-bit::before { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: radial-gradient(rgba(0,0,0,0.35) 30%, transparent 33%); background-size: 4px 4px; mix-blend-mode: multiply; }
+.tm-bit-banner { display: flex; align-items: center; gap: 2vmin; flex-wrap: wrap; background: #a00018; color: #fff; font-weight: 800; font-size: clamp(1.25rem, 5.4vmin, 3.5rem); line-height: 1.15; padding: 1.2vmin 2.4vmin; border-radius: 1vmin; letter-spacing: 0.02em; }
+.tm-bit-banner.is-blink { animation: tm-blink var(--tm-flash-period, 1s) steps(1, end) var(--tm-flash-count, 30); }
+@keyframes tm-blink { 0% { background: #a00018; } 50% { background: #000; box-shadow: inset 0 0 0 0.5vmin #ff3b30; } }
+.tm-bit-drill { background: #fff; color: #a00018; border-radius: 0.6vmin; padding: 0 0.4em; }
+.tm-bit-sender { margin-left: auto; font-weight: 700; font-size: 0.8em; }
+.tm-bit-main { flex: 1; min-height: 0; display: flex; align-items: center; gap: 4vmin; flex-direction: column; text-align: center; justify-content: center; }
+@media (orientation: landscape) { .tm-bit-main { flex-direction: row; text-align: left; } }
+.tm-bit .tm-icon { width: min(26vmin, 30vw); height: min(26vmin, 30vw); filter: drop-shadow(0 0 1.2vmin var(--tm-accent)); }
+.tm-bit .tm-title { color: var(--tm-accent); text-shadow: 0 0 1.4vmin color-mix(in srgb, var(--tm-accent) 60%, transparent); }
+.tm-bit .tm-body { color: var(--tm-fg); text-shadow: 0 0 1vmin color-mix(in srgb, var(--tm-fg) 45%, transparent); }
+.tm-bit-ticker { flex: none; overflow: hidden; white-space: nowrap; border-top: 0.4vmin solid #3a2a00; border-bottom: 0.4vmin solid #3a2a00; color: var(--tm-fg); font-size: clamp(1.25rem, 4.6vmin, 3rem); font-weight: 700; padding: 0.6vmin 0; }
+.tm-bit-ticker span { display: inline-block; padding-right: 8vmin; animation: tm-ticker 18s linear infinite; }
+@keyframes tm-ticker { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+.tm-bit .tm-tag { align-self: center; color: #fff; border-color: #fff; background: #000; }
+@media (prefers-reduced-motion: reduce) { .tm-bit-ticker span { animation: none; } .tm-bit-ticker span + span { display: none; } }
+@media (orientation: landscape) and (max-height: 520px) {
+  .tm-bit { gap: 1vmin; }
+  .tm-bit-banner { font-size: clamp(1rem, 5vmin, 1.5rem); padding: 0.6vmin 2vmin; }
+  .tm-bit-ticker { font-size: clamp(1rem, 4.4vmin, 1.4rem); }
+  .tm-bit .tm-tag { margin-top: 0; padding: 0.1em 0.8em; font-size: 1rem; }
+  .tm-bit-ticker { display: none; }
+  .tm-bit .tm-icon { width: 20vmin; height: 20vmin; }
+}
+
+/* ---------- Phone: 재난문자 full-screen dialog (훈련 rendering). ---------- */
+.ph-root { padding: 0; background: #1b2230; color: #111; }
+.ph-watermark { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 5; display: flex; flex-direction: column; justify-content: space-around; align-items: center; }
+.ph-watermark span { transform: rotate(-24deg); }
+.ph-watermark span { font-size: clamp(1.25rem, 6vw, 2.5rem); font-weight: 800; color: rgba(255, 255, 255, 0.13); white-space: nowrap; letter-spacing: 0.04em; }
+.ph-start, .ph-idle, .ph-backdrop { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)); }
+.ph-start { background: linear-gradient(160deg, #22324d, #0d1320); }
+.ph-start-card { position: relative; z-index: 6; background: #fff; border-radius: 22px; padding: 28px 22px; width: min(92vw, 440px); text-align: center; }
+.ph-start-title { font-size: 1.6rem; font-weight: 800; color: #111; }
+.ph-start-text { font-size: 1.05rem; line-height: 1.5; color: #333; margin: 12px 0 20px; }
+.ph-start-btn { all: unset; display: block; cursor: pointer; background: #1f5fbf; color: #fff; font-size: 1.5rem; font-weight: 800; padding: 16px 0; border-radius: 14px; width: 100%; }
+.ph-start-btn:focus-visible, .ph-ok:focus-visible { outline: 3px solid #ffb300; outline-offset: 3px; }
+.ph-start-hint { font-size: 0.95rem; color: #555; margin: 12px 0 0; white-space: normal; }
+.ph-idle { background: linear-gradient(160deg, #22324d, #0d1320); color: #fff; justify-content: flex-start; padding-top: 14vh; }
+.ph-lock-date { font-size: 1.25rem; font-weight: 600; }
+.ph-lock-time { font-size: clamp(4.5rem, 24vw, 7rem); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.ph-lock-note { margin-top: auto; font-size: 1.05rem; background: rgba(255,255,255,0.14); padding: 8px 14px; border-radius: 999px; }
+.ph-backdrop { background: rgba(10, 14, 22, 0.86); animation: ph-fade 220ms ease-out; }
+@keyframes ph-fade { from { opacity: 0; } to { opacity: 1; } }
+.ph-dialog { position: relative; z-index: 6; width: min(92vw, 460px); max-height: 100%; display: flex; flex-direction: column; background: #fff; border-radius: 22px; overflow: hidden; box-shadow: 0 18px 60px rgba(0,0,0,0.5); }
+.ph-header { display: flex; align-items: center; gap: 10px; background: var(--ph-accent); color: var(--ph-on-accent); font-size: 1.45rem; font-weight: 800; padding: 16px 18px; }
+.ph-icon { width: 28px; height: 28px; flex: none; color: var(--ph-on-accent); }
+.ph-meta { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 18px 0; color: #444; font-size: 1rem; font-weight: 600; }
+.ph-body { padding: 12px 18px 8px; font-size: 1.3rem; line-height: 1.55; color: #111; overflow-y: auto; min-height: 0; word-break: keep-all; text-wrap: pretty; }
+.ph-drill { margin: 4px 18px 0; align-self: flex-start; font-size: 0.95rem; font-weight: 700; color: #a00018; border: 2px solid #a00018; border-radius: 999px; padding: 2px 10px; }
+.ph-ok { all: unset; cursor: pointer; text-align: center; margin: 14px 0 0; border-top: 1px solid #ddd; padding: 16px 0; font-size: 1.35rem; font-weight: 800; color: var(--ph-accent); }
+.ph-root .tm-dot { z-index: 7; }

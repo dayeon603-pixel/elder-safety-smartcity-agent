@@ -1,4 +1,5 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { Suspense, lazy } from "react";
+import { BrowserRouter, HashRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthContext";
 import { AppShell } from "./components/AppShell";
 import type { NavItem } from "./components/AppShell";
@@ -14,11 +15,14 @@ import { HeatMapPage } from "./pages/HeatMapPage";
 import { HomePage } from "./pages/HomePage";
 import { ResultsPage } from "./pages/ResultsPage";
 import { IS_WALK_FRAMING } from "./config";
+import { IS_STATIC } from "./static/mode";
+import { landingPath } from "./static/device";
+import { MobilePage } from "./pages/MobilePage";
 import { RunsPage } from "./pages/RunsPage";
 import { SilverPage } from "./pages/SilverPage";
 import { OpsMapPage } from "./pages/app/OpsMapPage";
-import { TwinPage } from "./pages/TwinPage";
-import { TerminalPage } from "./pages/TerminalPage";
+const TwinPage = lazy(() => import("./pages/TwinPage").then((m) => ({ default: m.TwinPage })));
+const TerminalPage = lazy(() => import("./pages/TerminalPage").then((m) => ({ default: m.TerminalPage })));
 
 const NAV_WALK: readonly NavItem[] = [
   { to: "/", label: "개요", end: true },
@@ -45,6 +49,17 @@ const NAV_COMBINED: readonly NavItem[] = [
 const NAV: readonly NavItem[] = IS_WALK_FRAMING ? NAV_WALK : NAV_COMBINED;
 
 export function AppRoutes() {
+  // Public 시연판: only /twin and /terminal exist (the rest needs the backend); everything else lands on /twin.
+  if (IS_STATIC) {
+    return (
+      <Routes>
+        <Route path="twin" element={<TwinPage />} />
+        <Route path="terminal" element={<TerminalPage />} />
+        <Route path="m" element={<MobilePage />} />
+        <Route path="*" element={<Navigate to={landingPath()} replace />} />
+      </Routes>
+    );
+  }
   return (
     <Routes>
       <Route path="twin" element={<TwinPage />} />
@@ -71,13 +86,14 @@ export function AppRoutes() {
 }
 
 export default function App() {
+  const Router = IS_STATIC ? HashRouter : BrowserRouter;
   return (
-    <BrowserRouter>
+    <Router>
       <ToastProvider>
         <AuthProvider>
-          <AppRoutes />
+          <Suspense fallback={<p role="status" style={{ padding: 24 }}>불러오는 중…</p>}><AppRoutes /></Suspense>
         </AuthProvider>
       </ToastProvider>
-    </BrowserRouter>
+    </Router>
   );
 }

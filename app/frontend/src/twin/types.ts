@@ -120,7 +120,10 @@ export interface TwinRoute {
 }
 
 export interface EvidenceRow { label: string; value: string; source: string | null }
+export interface SignalItem { id: string; address: string; lat: number; lon: number; green: number; required: number }
 export interface ActionCard {
+  /** crosswalks the card is about (보행신호 연장 협의 요청: green time < required at 0.7 m/s) */
+  items: SignalItem[];
   id: string;
   kind: string;
   title: string;
@@ -146,6 +149,8 @@ export interface ActionCard {
   /** Existing WAV for 마을방송 / voice drafts */
   audioUrl: string | null;
   /** Several drafts with their own limit (e.g. 90자 현행 / 157자 시범운영) */
+  /** 2-minute walking-catchment gain (65+), AED conversion cards */
+  gain: number | null;
   drafts: { label: string | null; limit: number; length: number; text: string }[];
 }
 

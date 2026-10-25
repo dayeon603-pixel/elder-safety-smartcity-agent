@@ -39,6 +39,8 @@ export function satelliteLayer(day: number, h: SatHandlers): Layer {
   let loaded = 0;
   let errors = 0;
   const k = Math.round(dayFactor(day) * 255);
+  const tint = basemapStatus.get().photoTint ?? [255, 255, 255];
+  const tc = (c: number, extra = 1): number => Math.round((k * c * extra) / 255);
   return new TileLayer({
     id: "bm-sat",
     data: SAT_URL,
@@ -51,9 +53,9 @@ export function satelliteLayer(day: number, h: SatHandlers): Layer {
     onTileError: () => { errors++; if (loaded === 0 && errors >= ERRORS_BEFORE_FALLBACK) h.onFail(); },
     renderSubLayers: (props: { id: string; data?: unknown; tile: { boundingBox: [[number, number], [number, number]] } }) => {
       const [[w, s], [e, n]] = props.tile.boundingBox;
-      return new BitmapLayer({ id: props.id, image: props.data as never, bounds: [w, s, e, n], tintColor: [k, k, Math.round(k * (0.9 + 0.1 * Math.max(0, Math.min(1, day))))], parameters: { depthCompare: "always", depthWriteEnabled: false } as never, pickable: false } as never);
+      return new BitmapLayer({ id: props.id, image: props.data as never, bounds: [w, s, e, n], tintColor: [tc(tint[0]), tc(tint[1]), Math.round(tc(tint[2]) * (0.9 + 0.1 * Math.max(0, Math.min(1, day))))], parameters: { depthCompare: "always", depthWriteEnabled: false } as never, pickable: false } as never);
     },
-    updateTriggers: { renderSubLayers: k },
+    updateTriggers: { renderSubLayers: [k, tint.join(",")] },
     pickable: false,
   } as never);
 }

@@ -430,7 +430,7 @@ def test_terminal_hub_filters_and_message_builders() -> None:
     assert terminal.message_from_run({**rec, "trigger": "heat_daily", "steps": []}) is None
     assert terminal.heat_message("관악구", {"ours_alert": False}, {}, 14) is None
     hm = terminal.heat_message("관악구", {"ours_alert": True, "b1_alert": False, "date": DATE}, {"feels": 33.2}, 14)
-    assert hm is not None and "기상특보는 없지만" in hm["body"] and "관악구는" in hm["body"] and "에이전트 권고" in hm["title"]
+    assert hm is not None and "특보 기준에는 못 미치지만" in hm["body"] and "관악구는" in hm["body"] and "에이전트 권고" in hm["title"]
     assert "쉼터" not in hm["body"] and "가까운 열린 AED 위치를 화면에서 확인하세요" in hm["body"]  # no shelter data -> no shelter sentence
     with_sh = terminal.heat_message("관악구", {"ours_alert": True}, {}, 14, has_shelters=True)
     assert with_sh is not None and "무더위쉼터" in with_sh["body"]

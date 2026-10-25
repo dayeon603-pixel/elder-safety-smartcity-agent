@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { DRILL_TAG } from "../../lib/terminal/config";
 import type { IdleData, StopInfo, TerminalMessage } from "../../lib/terminal/types";
-import { AlertScreen, ConnectionDot, IdleScreen, StartScreen } from "./TerminalScreens";
+import { AlertScreen, ConnectionDot, IdleScreen, PhoneAlert, PhoneStartScreen, StartScreen } from "./TerminalScreens";
 
 const msg = (o: Partial<TerminalMessage>): TerminalMessage => ({ kind: "heat", title: "폭염 경보", body: "그늘에서 쉬세요", audio_url: null, stop_id: null, id: null, published_at: null, ...o });
 const stop: StopInfo = { stop_id: "S1", name: "관악푸르지오아파트", lat: 1, lon: 2, sgg_code: "11620" };
@@ -14,6 +14,8 @@ describe("AlertScreen", () => {
     expect(screen.getByTestId("terminal-alert")).toHaveAttribute("data-kind", kind);
     expect(screen.getByTestId("terminal-title")).toHaveTextContent("폭염 경보");
     expect(screen.getByText(DRILL_TAG)).toBeInTheDocument();
+    expect(screen.getByTestId("terminal-banner")).toHaveTextContent("[훈련]");
+    expect(screen.getByTestId("terminal-banner")).toHaveTextContent("관악구(시연)");
   });
   it("never renders a blank screen when title/body are empty", () => {
     render(<AlertScreen message={msg({ kind: "fall", title: "", body: "" })} voice="idle" flash={false} onTap={() => undefined} />);
@@ -32,6 +34,25 @@ describe("AlertScreen", () => {
     expect(screen.getByTestId("terminal-flash")).toBeInTheDocument();
     rerender(<AlertScreen message={msg({})} voice="idle" flash={false} onTap={() => undefined} />);
     expect(screen.queryByTestId("terminal-flash")).toBeNull();
+  });
+});
+
+describe("PhoneAlert", () => {
+  it("renders the 재난문자 dialog with 훈련 markers and a 확인 button", () => {
+    const onOk = vi.fn();
+    render(<PhoneAlert message={msg({})} sender="관악구(시연)" time="2026. 10. 25. 오후 2:03" onOk={onOk} />);
+    expect(screen.getByTestId("phone-header")).toHaveTextContent("[훈련] 안전 안내 문자");
+    expect(screen.getByTestId("phone-sender")).toHaveTextContent("관악구(시연)");
+    expect(screen.getByTestId("phone-body")).toHaveTextContent("[훈련] 폭염 경보. 그늘에서 쉬세요. [관악구(시연)]");
+    expect(screen.getByTestId("drill-watermark")).toHaveTextContent("훈련 · 실제 발송 아님");
+    screen.getByTestId("phone-ok").click();
+    expect(onOk).toHaveBeenCalledOnce();
+  });
+  it("start screen asks for one tap", () => {
+    const onStart = vi.fn();
+    render(<PhoneStartScreen sender="관악구(시연)" onStart={onStart} />);
+    screen.getByText("알림 받기 켜기").click();
+    expect(onStart).toHaveBeenCalledOnce();
   });
 });
 

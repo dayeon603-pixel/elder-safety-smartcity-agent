@@ -2,8 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { TwinEngine } from "../twin/engine";
 import { PerfProbe } from "../twin/perf";
-import { ActionsZone, BareCtx, Breadcrumb, CameraZone, EffectChipView, Legend, LayerPanel, ProtocolZone, Scoreboard, StepList, TimeBar, Toasts, TopBar } from "../twin/TwinPanels";
+import { ActionsZone, BareCtx, Breadcrumb, CameraZone, FallBanner, SignalNote, SilverLegend, EffectChipView, Legend, LayerPanel, ProtocolZone, Scoreboard, StepList, TimeBar, Toasts, TopBar } from "../twin/TwinPanels";
 import { useTwin } from "../twin/useTwin";
+import { IS_STATIC } from "../static/mode";
+import { VIEW_KEY } from "../static/device";
 import { QrOverlay } from "../twin/QrOverlay";
 import { StoryOverlay, useStoryController } from "../twin/story/StoryOverlay";
 
@@ -21,13 +23,21 @@ export function TwinPage() {
   const ctl = useTwin(engineRef);
   const story = useStoryController(engineRef, ctl);
   const [tab, setTab] = useState<Tab>("action");
+  const [glFailed, setGlFailed] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
   const closeQr = useCallback(() => setQrOpen(false), []);
   const [hidden, setHidden] = useState<ReadonlySet<string>>(new Set());
 
   useEffect(() => {
     if (host.current === null || rain.current === null) return;
-    const eng = new TwinEngine(host.current, rain.current);
+    let eng: TwinEngine;
+    try {
+      eng = new TwinEngine(host.current, rain.current);
+    } catch (e) {
+      // no WebGL (or a blocked GPU): keep every panel, show a message instead of the map
+      if (e instanceof Error) { setGlFailed(true); return; }
+      throw e;
+    }
     engineRef.current = eng;
     (window as unknown as { __twin?: PerfProbe }).__twin = new PerfProbe(eng);
     return () => { eng.destroy(); engineRef.current = null; };
@@ -62,7 +72,7 @@ export function TwinPage() {
   const sc = ctl.scene?.scene;
   const tabBtn = (t: { id: Tab; label: string }): JSX.Element => (
     <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} data-testid={`tab-${t.id}`} onClick={() => setTab(t.id)}
-      className={`relative flex-1 border-b-2 px-2 py-3 text-[16px] font-semibold ${tab === t.id ? "border-[var(--cr-accent)] text-[var(--cr-accent)]" : "border-transparent text-[var(--cr-muted)] hover:text-[var(--cr-text)]"}`}>
+      className={`relative flex-1 border-b-[3px] px-2 py-3 text-[17px] font-bold ${tab === t.id ? "border-[var(--cr-accent)] text-[var(--cr-accent)]" : "border-transparent text-[var(--cr-muted)] hover:text-[var(--cr-text)]"}`}>
       {t.label}{t.id === "camera" && ctl.fall.status === "pending" && <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-[var(--cr-bad)]" />}
     </button>
   );
@@ -70,10 +80,11 @@ export function TwinPage() {
     <div className="twin fixed inset-0 z-40 flex flex-col overflow-hidden" data-testid="twin-root">
       {qrOpen && <QrOverlay onClose={closeQr} />}
       <TopBar ctl={ctl} onQr={() => setQrOpen(true)} onJump={(t) => { if (t === "camera") setTab("camera"); else { setTab("action"); ctl.selectCard(t.card); } }}>
-        {ctl.stateError !== null && <span className="text-[12px] text-[var(--cr-warn)]" data-testid="state-error" title={ctl.stateError}>상태 자료 재시도 중</span>}
+        {ctl.stateError !== null && <span className="text-[13px] text-[var(--cr-warn)]" data-testid="state-error" title={ctl.stateError}>상태 자료 재시도 중</span>}
         <details className="relative" data-testid="more-menu">
           <summary className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded border border-[var(--cr-line)] text-[20px] leading-none hover:bg-[#E8EEF6]" aria-label="더보기">⋯</summary>
           <div className="absolute right-0 z-50 mt-1 flex w-40 flex-col rounded border border-[var(--cr-line)] bg-white py-1 shadow">
+            {IS_STATIC && <Link to="/m" onClick={() => { try { localStorage.setItem(VIEW_KEY, "mobile"); } catch { /* ignore */ } }} className="px-3 py-1.5 text-[14px]" data-testid="to-mobile">모바일 화면으로 보기</Link>}
             <Link to="/" className="px-3 py-1.5 text-[14px]">개요</Link>
             <Link to="/field" className="px-3 py-1.5 text-[14px]">현장 에이전트</Link>
             <Link to="/app" className="px-3 py-1.5 text-[14px]">도시 운영 지도</Link>
@@ -94,17 +105,26 @@ export function TwinPage() {
         </aside>
         <main className="relative min-w-0 flex-1" data-testid="zone-city">
           <Toasts ctl={ctl} />
+          {glFailed && (
+            <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-[#0b1018] p-6 text-center text-white" role="alert" data-testid="gl-fallback">
+              <p className="m-0 text-[20px] font-bold">이 기기에서는 3D 지도를 그릴 수 없습니다</p>
+              <p className="m-0 text-[16px] text-[#cbd5e1]">오른쪽 패널의 조치·공문은 그대로 볼 수 있고, 지도는 시연 영상이나 모바일 화면에서 볼 수 있습니다.</p>
+              <Link to="/m" className="rounded-[5px] bg-white px-4 py-2 text-[16px] font-bold text-[#0F4C9A]">모바일 화면으로 보기</Link>
+            </div>
+          )}
           <div ref={host} className="absolute inset-0" style={{ background: "linear-gradient(var(--sky-top, #0b1018), var(--sky-bottom, #1a2330))" }} data-testid="deck-host" />
           <canvas ref={rain} className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true" />
           <div className="pointer-events-none absolute right-3 top-3"><Scoreboard ctl={ctl} /></div>
-          <div className="pointer-events-none absolute left-1/2 top-[64px] -translate-x-1/2"><EffectChipView ctl={ctl} /></div>
+          <div className="pointer-events-none absolute left-1/2 top-[150px] -translate-x-1/2"><EffectChipView ctl={ctl} /></div>
           <StoryOverlay controller={story} ctl={ctl} />
+          <SilverLegend ctl={ctl} />
+          <SignalNote ctl={ctl} />
           <div className="absolute right-3 top-1/2 flex -translate-y-1/2 flex-col overflow-hidden rounded border border-[var(--cr-line)] bg-white shadow" data-testid="map-toolbar" role="toolbar" aria-label="지도 도구">
             <button type="button" aria-label="확대" onClick={() => engineRef.current?.zoomBy(0.6)} className="h-9 w-9 text-[20px] hover:bg-[#E8EEF6]">+</button>
             <button type="button" aria-label="축소" onClick={() => engineRef.current?.zoomBy(-0.6)} className="h-9 w-9 border-t border-[var(--cr-line)] text-[20px] hover:bg-[#E8EEF6]">−</button>
             <button type="button" aria-label="전체 보기" onClick={() => engineRef.current?.flyTo("overview")} className="h-9 w-9 border-t border-[var(--cr-line)] text-[13px] hover:bg-[#E8EEF6]">전체</button>
           </div>
-          {sc?.credit != null && <p className="pointer-events-none absolute bottom-2 left-3 m-0 max-w-[70%] truncate rounded-sm bg-white/90 px-2 py-1 text-[12px] text-[var(--cr-muted)]" data-testid="credit">ⓒ {sc.credit}</p>}
+          {sc?.credit != null && <p className="pointer-events-none absolute bottom-2 left-3 m-0 max-w-[70%] truncate rounded-[5px] bg-white/90 px-2 py-1 text-[13px] text-[var(--cr-muted)]" data-testid="credit">ⓒ {sc.credit}</p>}
           {ctl.scene === null && (
             <p className="absolute inset-0 m-0 flex items-center justify-center bg-[#0b1018] text-[22px] text-[#aab6c4]" role="status">
               {ctl.sceneError === null ? "도시 모델을 만드는 중…" : `도시 모델을 불러오지 못했습니다: ${ctl.sceneError}`}
@@ -112,6 +132,7 @@ export function TwinPage() {
           )}
         </main>
         <aside className="flex w-[400px] shrink-0 flex-col border-l border-[var(--cr-line)] bg-white max-[1500px]:w-[372px]" data-testid="right-panel">
+          <FallBanner ctl={ctl} />
           <div role="tablist" className="flex shrink-0 border-b border-[var(--cr-line)]">{TABS.map(tabBtn)}</div>
           <BareCtx.Provider value={true}>
             <div className={`min-h-0 flex-1 ${tab === "action" ? "" : "hidden"}`}><ActionsZone ctl={ctl} /></div>

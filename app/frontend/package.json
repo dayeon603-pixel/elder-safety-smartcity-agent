@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
+    "build:pages": "VITE_STATIC=1 VITE_DEMO_TOKEN= vite build --outDir dist-pages --emptyOutDir && node scripts/verify_pages.mjs dist-pages",
+    "record:fixtures": "node scripts/record_fixtures.mjs",
+    "preview:pages": "VITE_STATIC=1 vite preview --base /elder-safety-smartcity-agent/ --outDir dist-pages --port 5191",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "preview": "vite preview --port 5190",

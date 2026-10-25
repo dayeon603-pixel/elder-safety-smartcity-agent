@@ -85,17 +85,23 @@ export const STEP_HOURS = { brief: 9, heat: 17, deliver: 17.5, silver: 17.5, inc
 /** ★ 한눈에 표의 행 순서 그대로: 언제 · 어디에 · 무엇을 · 밤. `effectKeys` = names the effects API may use for the step. */
 export const STEPS: readonly { no: 1 | 2 | 3 | 4 | 5 | 6; id: "s1" | "s2" | "s3" | "silver" | "s4" | "night"; label: string; hint: string; effectKeys: readonly string[] }[] = [
   { no: 1, id: "s1", label: "브리핑", hint: "오전 브리핑", effectKeys: [] },
-  { no: 2, id: "s2", label: "언제 · 폭염 대응", hint: "특보 전일 대응 검토", effectKeys: ["heat", "when", "폭염", "언제"] },
+  { no: 2, id: "s2", label: "폭염 대응", hint: "특보 전일 대응 검토", effectKeys: ["heat", "when", "폭염", "언제"] },
   { no: 3, id: "s3", label: "현장 전달", hint: "안내단말 전달", effectKeys: [] },
-  { no: 4, id: "silver", label: "어디에 · 실버존", hint: "현행 기준 → 에이전트", effectKeys: ["silver", "where", "실버존", "어디에"] },
-  { no: 5, id: "s4", label: "무엇을 · 낙상", hint: "낙상 의심 사건", effectKeys: ["fall", "what", "낙상", "무엇을"] },
-  { no: 6, id: "night", label: "밤 · AED", hint: "야간 AED 공백", effectKeys: ["aed", "night", "밤", "AED"] },
+  { no: 4, id: "silver", label: "실버존 재배치", hint: "현행 기준 → 에이전트", effectKeys: ["silver", "where", "실버존", "어디에"] },
+  { no: 5, id: "s4", label: "낙상 대응", hint: "낙상 의심 사건", effectKeys: ["fall", "what", "낙상", "무엇을"] },
+  { no: 6, id: "night", label: "야간 AED", hint: "야간 AED 공백", effectKeys: ["aed", "night", "밤", "AED"] },
 ];
 /** Step 3's chip is text only (no figures). */
 export const DELIVER_CHIP_TEXT = "휴대폰 없이도 · 정류장 단말 · 마을방송";
 /** Delay before the silver step flips [현행 기준] → [에이전트], so the viewer sees the starting state first. */
-export const SILVER_FLIP_DELAY_MS = 1400;
+export const SILVER_FLIP_DELAY_MS = 2200;
 export const SHELTER_NOTE = "관악구 무더위쉼터 공개자료 없음 → 구청 보유 목록 연계 필요(파일럿 필수 데이터)";
 export const AED_NOTE = "공공데이터 운영시간 기준 · 현장 확인 필요";
 export const STAGES = ["초안", "주무관 채택", "과장 결재(시연)"] as const;
 export const HOLD_REASON_MAX = 200;
+
+/** Quick reason for an AED 24h-opening request the installing organisation declines. */
+/** Adjacent 구 whose crosswalk data has short green times (관악구 has none): used for the 보행신호 연장 협의 card. */
+export const SIGNAL_NEIGHBOR_CODE = "11590";
+export const REFUSE_REASON = "설치기관 거절";
+export const ALL_REFUSED_TEXT = "야외 보관함 신설 검토 · 그 사이 열린 AED 경로 안내";

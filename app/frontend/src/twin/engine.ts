@@ -9,9 +9,11 @@ import type { Layer } from "@deck.gl/core";
 import { CAMERA, RENDER, PALETTE } from "./constants";
 import { aedIsOpen, boundaryLayers, buildingLayer, dynamicLayers, roadLayer } from "./layers";
 import type { DynCtx } from "./layers";
-import { PLAYBACK_MS, infraLayers, playbackLayers } from "./infra";
-import type { Infra, PlaybackEvent, PlaybackKind } from "./infra";
+import { PLAYBACK_MS, infraLayers, playbackLayers, signalShortLayers } from "./infra";
+import type { Infra, PlaybackEvent, PlaybackKind, SignalShort } from "./infra";
 import { BasemapController } from "./basemap/controller"; // BASEMAP hook (offline map under the buildings)
+import { silverStepLayers } from "./silverStep";
+import type { SilverContext } from "./silverStep";
 import { lightingFor, sunPosition } from "./sun";
 import type { Lighting } from "./sun";
 import type { LonLat, Mode, SceneBuffers, TwinState } from "./types";
@@ -88,7 +90,15 @@ export class TwinEngine {
   private basemap = new BasemapController();
   /** street-level story: control-room overlays (silver discs, AED beacons ...) are hidden */
   private storyStreet = false;
+  /** POSTER hook: hide the control-room overlays (the poster draws its own infra arcs) */
+  private posterMode = false;
+  setPosterMode(on: boolean): void { if (on !== this.posterMode) { this.posterMode = on; this.dirty = true; } }
   private lastTall = false;
+  private silverCtx: SilverContext | null = null;
+  private silverOn = false;
+  private morphMs = MODE_MORPH_MS;
+  private flipStart = 0;
+  private signalShort: SignalShort[] = [];
   private infra: Infra | null = null;
   private hiddenGroups: ReadonlySet<string> = new Set();
   private events: PlaybackEvent[] = [];
@@ -104,10 +114,10 @@ export class TwinEngine {
   constructor(parent: HTMLDivElement, rainCanvas: HTMLCanvasElement) {
     this.parent = parent;
     this.rain = rainCanvas;
-    this.dpr = Math.min(window.devicePixelRatio || 1, RENDER.dprCap);
+    this.dpr = Math.min(window.devicePixelRatio || 1, new URLSearchParams(window.location.search).has("poster") ? Number.POSITIVE_INFINITY : RENDER.dprCap); // POSTER hook: full device pixels for poster renders
     this.deck = new Deck({
       parent,
-      views: new MapView({ repeat: false }),
+      views: new MapView({ repeat: false, ...(new URLSearchParams(window.location.search).has("poster") ? { farZMultiplier: 6 } : {}) }) /* POSTER hook: far plane beyond the horizon strip */,
       initialViewState: { longitude: 126.94, latitude: 37.47, zoom: 11, pitch: CAMERA.overview.pitch, bearing: CAMERA.overview.bearing },
       controller: true,
       layers: [],
@@ -165,7 +175,7 @@ export class TwinEngine {
 
   private groundColor(): [number, number, number, number] {
     const st = this.state;
-    const alert = st === null ? null : this.mode === "ours" ? st.heat.oursAlert : st.heat.b1Alert;
+    const alert = this.silverOn || st === null ? null : this.mode === "ours" ? st.heat.oursAlert : st.heat.b1Alert;
     const base = (alert === true ? PALETTE.groundHeat : PALETTE.groundCalm) as [number, number, number, number];
     const k = this.light === null ? 1 : 0.55 + 0.45 * this.light.day;
     return [Math.round(base[0] * k), Math.round(base[1] * k), Math.round(base[2] * k), 255];
@@ -195,8 +205,14 @@ export class TwinEngine {
     this.rebuildStatic();
   }
 
-  setMode(m: Mode): void {
+  setSilverContext(c: SilverContext | null): void { this.silverCtx = c; this.dirty = true; }
+  /** The silver step draws its own before/after layers and keeps the ground neutral. */
+  setSilverStep(on: boolean): void { this.silverOn = on; this.rebuildStatic(); }
+
+  setMode(m: Mode, ms: number = MODE_MORPH_MS): void {
     if (m === this.mode) return;
+    this.morphMs = ms;
+    this.flipStart = performance.now();
     this.mode = m;
     this.openById = new Map((this.state?.aed ?? []).map((a) => [a.id, aedIsOpen(a, m)]));
     this.modeFrom = this.modeT;
@@ -236,6 +252,8 @@ export class TwinEngine {
     if (v === null || this.storyLock) return;
     this.setViewState({ ...v, zoom: v.zoom + dz }, 250);
   }
+
+  setSignalShort(items: SignalShort[]): void { this.signalShort = items; this.dirty = true; }
 
   setInfra(i: Infra | null): void { this.infra = i; this.dirty = true; }
 
@@ -288,9 +306,9 @@ export class TwinEngine {
   onTick: ((nowMs: number) => Layer[] | null) | null = null;
 
   /** Camera override: jump or fly to an arbitrary view state (e.g. a street-level follow camera). */
-  setViewState(vs: ViewState, transitionMs = 0): void {
+  setViewState(vs: ViewState, transitionMs = 0, force = false): void {
     // a story view that has released the camera must not overwrite a preset chosen after the release (stale 'saved view' pushes)
-    if (!this.storyLock && this.lastFlyAt > this.lockReleasedAt) return;
+    if (!force && !this.storyLock && this.lastFlyAt > this.lockReleasedAt) return;
     this.lastVs = vs;
     this.deck.setProps({ initialViewState: { ...vs, ...(transitionMs > 0 ? { transitionDuration: transitionMs, transitionInterpolator: new FlyToInterpolator({ speed: 1.4 }) } : {}) } as never });
   }
@@ -337,7 +355,7 @@ export class TwinEngine {
     }
     if (this.modeT !== (this.mode === "ours" ? 1 : 0)) {
       const target = this.mode === "ours" ? 1 : 0;
-      const f = Math.min(1, (now - this.modeStart) / MODE_MORPH_MS);
+      const f = Math.min(1, (now - this.modeStart) / this.morphMs);
       const e = f * f * (3 - 2 * f);
       this.modeT = this.modeFrom + (target - this.modeFrom) * e;
       animating = true;
@@ -383,7 +401,7 @@ export class TwinEngine {
     };
     const bm = this.basemapLayers(); // BASEMAP hook
     const vis = (l: Layer): boolean => this.hiddenGroups.size === 0 || !this.hiddenGroups.has(groupOf(l.id));
-    this.deck.setProps({ layers: [...this.staticLayers.slice(0, 1), ...bm.under, ...this.staticLayers.slice(1), ...bm.over, ...(this.storyStreet ? [] : dynamicLayers(ctx).filter(vis)), ...(this.infra === null ? [] : infraLayers({ infra: this.infra, hidden: this.storyStreet }).filter(vis)), ...(this.storyStreet || this.infra === null ? [] : playbackLayers(this.events, this.infra.control, now)), ...this.extra] });
+    this.deck.setProps({ layers: [...this.staticLayers.slice(0, 1), ...bm.under, ...this.staticLayers.slice(1), ...bm.over, ...(this.storyStreet || this.posterMode ? [] : dynamicLayers(ctx).filter((l) => vis(l) && !(this.silverOn && this.silverCtx !== null && (l.id === "silver-current" || l.id === "silver-ours" || l.id === "accidents" || l.id.startsWith("aed") || l.id === "stops" || l.id === "crosswalks" || l.id === "shelters")))), ...(this.silverOn && this.silverCtx !== null && !this.storyStreet ? silverStepLayers(this.silverCtx, this.modeT, now - this.flipStart) : []), ...signalShortLayers(this.signalShort).filter(vis), ...(this.infra === null ? [] : infraLayers({ infra: this.infra, hidden: this.storyStreet || this.silverOn }).filter(vis)), ...(this.storyStreet || this.infra === null ? [] : playbackLayers(this.events, this.infra.control, now)), ...this.extra] });
   };
 
   private drawRain(): void {

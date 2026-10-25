@@ -23,6 +23,7 @@ export function bindStory(engine: TwinEngine, c: StoryController): () => void {
   engine.onTick = (now: number): Layer[] | null => {
     const f = c.frame(now);
     engine.setStoryLock(f.controlled, f.street);
+    engine.setPosterMode(f.poster === true);
     if (f.view !== null) engine.setViewState(f.view as ViewState);
     last = f.layers;
     if (!f.animating) engine.setExtraLayers(f.layers, false);

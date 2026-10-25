@@ -12,10 +12,11 @@ export interface KindStyle {
 /** WCAG AAA (7:1) is enforced for every fg/bg and accent/bg pair in present.test.ts. */
 export const KIND_STYLE: Readonly<Record<TerminalKind | "idle", KindStyle>> = {
   idle: { label: "안내", bg: "#0b1220", fg: "#ffffff", accent: "#ffd54a" },
-  heat: { label: "폭염", bg: "#7a2300", fg: "#ffffff", accent: "#ffe08a" },
-  fall: { label: "응급", bg: "#7a0010", fg: "#ffffff", accent: "#ffe08a" },
-  rain: { label: "호우", bg: "#08265f", fg: "#ffffff", accent: "#9fdcff" },
-  clear: { label: "안전", bg: "#0a4220", fg: "#ffffff", accent: "#b8f5c8" },
+  // Alerts render as an LED/BIT board: black ground, amber text, class accent (ALERT_FORMAT.md §4: no BIT standard found, own design).
+  heat: { label: "폭염", bg: "#000000", fg: "#ffc23d", accent: "#ff8a1f" },
+  fall: { label: "응급", bg: "#000000", fg: "#ffc23d", accent: "#ff6a5c" },
+  rain: { label: "호우", bg: "#000000", fg: "#ffc23d", accent: "#7cc8ff" },
+  clear: { label: "안전", bg: "#000000", fg: "#9dffb4", accent: "#4cff7a" },
 };
 
 /** Fallback line when a message has no title/body (the screen must never be blank). */

@@ -67,14 +67,32 @@ test("공무원의 하루: 6 steps, approval chain, hold reason, preview and spe
   await expect(page.getByTestId("pv-title")).not.toContainText("재난문자 초안 송출");
   await page.getByTestId("select-card").first().click();
 
+  // work-environment chrome
+  await expect(page.getByTestId("user-chip")).toContainText("주무관");
+  await expect(page.getByTestId("breadcrumb")).toContainText("오늘의 업무");
+  await expect(page.getByTestId("bell-count")).toBeVisible();
+  await page.getByTestId("bell").click();
+  await expect(page.getByTestId("bell-list")).toContainText("재난문자 초안");
+  await page.getByTestId("bell").click();
+  // work-environment chrome: user chip, breadcrumb, bell with pending items
+  await expect(page.getByTestId("user-chip")).toContainText("주무관");
+  await expect(page.getByTestId("breadcrumb")).toContainText("오늘의 업무");
+  await expect(page.getByTestId("bell-count")).toBeVisible();
+  await page.getByTestId("bell").click();
+  await expect(page.getByTestId("bell-list")).toContainText("재난문자 초안");
+  await page.getByTestId("bell").click();
   // adopt -> chip stage 2, tamper-evident record, step 2 done; then 과장 결재(시연) -> stage 3, step 3 done
   await page.getByTestId("adopt").first().click();
   await expect(page.getByTestId("audit-line").first()).toContainText("변조 탐지 기록");
   await expect(page.getByTestId("approval-chip").first()).toHaveAttribute("data-stage", "2");
   await expect(page.getByTestId("scn-s2")).toHaveAttribute("data-done", "1");
   await page.getByTestId("approve").first().click();
+  await expect(page.getByTestId("toast").first()).toBeVisible();
+  await expect(page.getByTestId("card-timeline").first()).toContainText(/초안 \d\d:\d\d → 상신 \d\d:\d\d → 결재\(시연\) \d\d:\d\d/);
   await expect(page.getByTestId("approval-chip").first()).toHaveAttribute("data-stage", "3");
   await expect(page.getByTestId("scn-s3")).toHaveAttribute("data-done", "1");
+  // 결재함 / tally count only this session's decisions
+  await expect(page.getByTestId("inbox-count")).toHaveText("1");
 
   // hold with a reason
   await page.getByTestId("hold").nth(1).click();
@@ -119,6 +137,8 @@ test("공무원의 하루: 6 steps, approval chain, hold reason, preview and spe
   await expect(page.getByTestId("button-demo")).toBeVisible();
   await expect(page.getByTestId("fall-alert-text")).toContainText(/시연 카메라 #\d.*낙상 의심 감지 · 17:40/, { timeout: 15_000 });
   await expect(page.getByTestId("camera-label")).toContainText("시연 영상");
+  await expect(page.getByTestId("fall-banner")).toContainText("낙상 의심 · 관제요원 확인 필요");
+  await expect(page.getByTestId("fall-banner-loc")).toContainText("시연 카메라");
   await expect(page.getByTestId("alert-panel")).toContainText(/가까운 열린 AED · .+ \d+ m/, { timeout: 20_000 });
   await expect(page.getByTestId("state-loading")).toHaveCount(0, { timeout: 30_000 });
   await expect(page.getByTestId("action-cards")).toHaveAttribute("data-night", "0");
@@ -129,6 +149,7 @@ test("공무원의 하루: 6 steps, approval chain, hold reason, preview and spe
   await expect(page.getByTestId("doc-note")).toContainText("HTEST");
   await expect(page.locator("[data-mark='1']").first()).toBeVisible();
   await expect(page.getByTestId("alert-panel")).toHaveAttribute("data-status", "done", { timeout: 60_000 });
+  await expect(page.getByTestId("scn-s4")).toHaveAttribute("data-done", "1");
   await page.waitForTimeout(1500);
   await page.screenshot({ path: `${SHOTS}/twin-4-fall${SUF}.png` });
 
@@ -140,6 +161,19 @@ test("공무원의 하루: 6 steps, approval chain, hold reason, preview and spe
   await expect(page.getByTestId("action-card").first()).toContainText("24시간 개방 요청");
   await page.waitForTimeout(2500);
   await page.screenshot({ path: `${SHOTS}/twin-5-night${SUF}.png` });
+  // AED refusal path: 보류 → 설치기관 거절 → next candidate is proposed; all refused → 보관함 신설 검토
+  await page.getByTestId("hold").first().click();
+  await page.getByTestId("refuse-chip").click();
+  await expect(page.getByTestId("refused-line")).toContainText("다음 후보 제안");
+  await expect(page.getByTestId("next-candidate")).toBeVisible();
+  await expect(page.locator("[data-testid=action-card][data-refused='1']")).toHaveCount(1);
+  await page.screenshot({ path: `${SHOTS}/twin-5c-refused${SUF}.png` });
+  for (let i = 1; i < 5; i++) {
+    await page.locator("[data-testid=action-card][data-refused='0'] [data-testid=hold]").first().click();
+    await page.getByTestId("refuse-chip").click();
+    await expect(page.locator("[data-testid=action-card][data-refused='1']")).toHaveCount(i + 1);
+  }
+  await expect(page.getByTestId("all-refused")).toContainText("야외 보관함 신설 검토");
   await page.getByTestId("mode-ours").click();
   await expect(page.getByTestId("mode-ours")).toHaveAttribute("aria-pressed", "true");
   await page.waitForTimeout(1500);
@@ -171,6 +205,20 @@ test("공개 낙상 영상: recorded UR Fall clip through the live pipeline trig
   await expect(page.getByTestId("urfall-credit")).toContainText("CC BY-NC-SA 4.0");
   await page.waitForTimeout(1500);
   await page.screenshot({ path: `${SHOTS}/twin-7-urfall-midfall.png` });
+});
+
+test("보행신호 연장 협의: the adjacent-구 card highlights short-green crosswalks and opens its 요청서 초안", async ({ page }) => {
+  await page.setViewportSize(SIZES[0]);
+  await open(page);
+  await page.keyboard.press("2");
+  const card = page.locator("[data-testid=action-card]").filter({ hasText: "보행신호 연장" }).first();
+  await expect(card).toBeVisible({ timeout: 20_000 });
+  await page.getByTestId("select-card").filter({ hasText: "보행신호 연장" }).first().click();
+  await card.getByTestId("why").click();
+  await expect(page.getByTestId("why-panel")).toContainText(/녹색|필요/);
+  await page.getByRole("button", { name: "닫기" }).click();
+  await page.getByTestId("tab-doc").click();
+  await expect(page.getByTestId("pv-to")).toContainText("경찰");
 });
 
 test("nav and overview link to /twin", async ({ page }) => {

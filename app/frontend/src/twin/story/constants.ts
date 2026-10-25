@@ -34,6 +34,8 @@ export const TRIP_LOOP_S = 9;
 export const TRIP_COLOR: Color = [120, 205, 255, 255];
 export const TRIP_COLOR_65: Color = [255, 158, 64, 255];
 /** Control view (subtle) and street view (people walk at ~1.3 m/s, short trails). */
+/** Poster renders: brighter, longer trails, additive glow */
+export const TRIP_POSTER = { rate: 0.55, trail: 0.8, widthM: 10, opacity: 1 } as const;
 export const TRIP_VIEW = {
   overview: { rate: 1, trail: 3, widthM: 9, opacity: 0.8 },
   street: { rate: 1.3 / TRIP_VIS_MPS, trail: 0.4, widthM: 0.9, opacity: 0.8 },

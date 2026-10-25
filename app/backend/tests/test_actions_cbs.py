@@ -25,7 +25,7 @@ def inp(**kw: object) -> cbs.CbsInput:
 
 def test_limits_are_the_documented_ones() -> None:
     assert C.CBS_LIMIT_CURRENT == 157 and C.CBS_LIMIT_LEGACY == 90
-    assert "157" in C.CBS_LIMIT_SOURCE and "2026-06-30" in C.CBS_LIMIT_SOURCE
+    assert "157" in C.CBS_LIMIT_SOURCE and "재난문자방송 기준 및 운영규정 별표 2" in C.CBS_LIMIT_SOURCE and "시행" not in C.CBS_LIMIT_SOURCE
 
 
 @pytest.mark.parametrize("limit", [90, 157])

@@ -1,8 +1,8 @@
 /** Tiny external store: which ground the map shows (for the attribution line) and the first-paint timing. */
 export type GroundMode = "probing" | "satellite" | "osm";
-export interface BasemapStatus { mode: GroundMode; firstTileMs: number | null; osmReady: boolean }
+export interface BasemapStatus { mode: GroundMode; firstTileMs: number | null; osmReady: boolean; /** multiplied into the satellite photo (poster golden hour) */ photoTint: [number, number, number] | null }
 
-let status: BasemapStatus = { mode: "probing", firstTileMs: null, osmReady: false };
+let status: BasemapStatus = { mode: "probing", firstTileMs: null, osmReady: false, photoTint: null };
 const listeners = new Set<() => void>();
 
 export const basemapStatus = {

@@ -54,6 +54,12 @@ export function basemapLayers(b: Basemap, c: BaseCtx): Layer[] {
   return out;
 }
 
+/** Dark terrain-green plane under the photo: tiles outside the proxy's demo area (404) show as ground, not as a hole. */
+export function photoEarthLayer(c: BaseCtx): Layer {
+  const ring: Ring[] = [[[-EXTENT_M, -EXTENT_M], [EXTENT_M, -EXTENT_M], [EXTENT_M, EXTENT_M], [-EXTENT_M, EXTENT_M], [-EXTENT_M, -EXTENT_M]]];
+  return new PolygonLayer<Ring[]>({ id: "bm-photo-earth", ...frame(c.center), data: [ring], getPolygon: (r: Ring[]) => r as never, getFillColor: shade([52, 66, 52], Math.round(c.day * 20) / 20), stroked: false, parameters: FLAT, pickable: false, updateTriggers: { getFillColor: Math.round(c.day * 20) } });
+}
+
 /** Thin roads, rail and (night-darkened) streams over the photo; the heat tint stays. */
 function photoOverlays(b: Basemap, c: BaseCtx, f: ReturnType<typeof frame>, d: number, q: number): Layer[] {
   const out: Layer[] = [

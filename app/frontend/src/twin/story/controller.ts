@@ -7,10 +7,15 @@ import { loadRoute } from "../api";
 import type { CrosswalkPoint, SceneBuffers, StopPoint, TwinState } from "../types";
 import { fetchTerminalLast, publishHeat } from "./api";
 import type { TerminalMsg } from "./api";
-import { CAM, DISPLAY_SCALE, WALK_MPS, ENTER_MS, EXIT_MS, FALL_HOLD_MS, PASSERBY_LABEL, PERSON, PERSON_LABEL, PULSE_PERIOD_MS, TERMINAL_POLL_MAX_MS, TERMINAL_POLL_MS, TRIP_LOOP_S, TRIP_VIEW, WALK_BASIS, POP_DEBOUNCE_MS } from "./constants";
+import { CAM, DISPLAY_SCALE, TRIP_POSTER, WALK_MPS, ENTER_MS, EXIT_MS, FALL_HOLD_MS, PASSERBY_LABEL, PERSON, PERSON_LABEL, PULSE_PERIOD_MS, TERMINAL_POLL_MAX_MS, TERMINAL_POLL_MS, TRIP_LOOP_S, TRIP_VIEW, WALK_BASIS, POP_DEBOUNCE_MS } from "./constants";
 import { angleDiff, cumulative, makeFrame, pointAt, toLonLat, toXY } from "./geo";
 import type { Frame, XY } from "./geo";
 import { buildGraph, edgePolyline, nearestNode } from "./graph";
+import { loadInfra, infraFromState } from "../infra";
+import { basemapStatus } from "../basemap/store";
+import { TWIN_SGG_CODE } from "../constants";
+import { posterLayers } from "./poster";
+import type { PosterCfg, PosterInfra } from "./poster";
 import { BuildingIndex, buildEdges, shelterLayers, streetLayers, zebraLayer } from "./streetscape";
 import type { EdgeBuffers } from "./streetscape";
 import type { Graph } from "./graph";
@@ -77,6 +82,9 @@ const AED_POLE_H = 4.2;
 const FALLEN_LABEL_H = 4.6;
 const SHELTER_ROOF_H = 3.6;
 const FRONT_DIST_M = 16;
+const POSTER_LEAD_M = 18;
+/** golden hour: warm multiply on the satellite photo */
+const POSTER_PHOTO_TINT: [number, number, number] = [255, 226, 190];
 const FRONT_PITCH_DEG = 68;
 const ZEBRA_FALLBACK_M = 8;
 const GREEN: [number, number, number, number] = [61, 220, 151, 255];
@@ -128,6 +136,8 @@ export class StoryController implements StoryHost {
   private routeCum: number[] = [];
   private pendingRescue: { path: XY[]; meters: number } | null = null;
   private camZoom = 0;
+  poster: PosterCfg | null = null;
+  private posterInfra: PosterInfra | null = null;
   /** test aid: camera ~6 m in front of the person, looking back (heading check) */
   frontCam = false;
   private camEvalAt = 0;
@@ -409,27 +419,58 @@ export class StoryController implements StoryHost {
         this.blend = clamp01((now - this.blendT0) / ENTER_MS);
       }
     }
-    const street = this.controlled ? ease(this.blend) : 0;
+    const posterOn = this.controlled && this.poster !== null;
+    const street = this.controlled && !posterOn ? ease(this.blend) : 0;
     const v = TRIP_VIEW;
-    this.vt += (dt / 1000) * (v.overview.rate + (v.street.rate - v.overview.rate) * street);
+    this.vt += (dt / 1000) * (posterOn ? TRIP_POSTER.rate : v.overview.rate + (v.street.rate - v.overview.rate) * street);
 
     const layers: Layer[] = [];
     if (this.motionOn && this.trips !== null && this.trips.count > 0) {
       const lerp = (a: number, b: number): number => a + (b - a) * street;
-      layers.push(tripsLayer(sc.center, this.trips, this.vt % TRIP_LOOP_S, lerp(v.overview.opacity, v.street.opacity), lerp(v.overview.trail, v.street.trail), lerp(v.overview.widthM, v.street.widthM)));
+      layers.push(posterOn
+        ? tripsLayer(sc.center, this.trips, this.vt % TRIP_LOOP_S, TRIP_POSTER.opacity, TRIP_POSTER.trail, this.poster?.tw ?? TRIP_POSTER.widthM)
+        : tripsLayer(sc.center, this.trips, this.vt % TRIP_LOOP_S, lerp(v.overview.opacity, v.street.opacity), lerp(v.overview.trail, v.street.trail), lerp(v.overview.widthM, v.street.widthM)));
     }
     let view: StoryViewState | null = null;
     if (this.controlled) {
       this.storyLayers(now, layers, f, sc);
-      view = this.cameraView(now, dt, f);
+      view = posterOn ? this.posterView(f) : this.cameraView(now, dt, f);
+      if (posterOn && this.posterInfra !== null) layers.push(...posterLayers(sc.center, f, this.posterInfra, now));
       if (this.exiting && this.blend <= 0.0005) {
         this.finishExit();
         return { layers, view: this.saved, animating: false, controlled: false, street: false };
       }
     }
     this.updateAnchors(f);
-    return { layers, view, animating: this.controlled || (this.motionOn && this.trips !== null), controlled: this.controlled, street: this.controlled && street > STREET_AT };
+    return { layers, view, animating: this.controlled || (this.motionOn && this.trips !== null), controlled: this.controlled, street: this.controlled && street > STREET_AT, poster: posterOn };
   };
+
+  /** Poster mode: fixed cinematic camera given in metres from the scene centre. */
+  private posterView(f: Frame): StoryViewState {
+    const p = this.poster as PosterCfg;
+    const plan = this.plan;
+    if (p.follow === true && plan !== null) {
+      const h = pointAt(plan.path, plan.cum, plan.lengthM).heading;
+      const [flon, flat] = toLonLat(f, plan.stop.xy[0] + Math.cos(h) * POSTER_LEAD_M, plan.stop.xy[1] + Math.sin(h) * POSTER_LEAD_M);
+      return { longitude: flon, latitude: flat, zoom: p.zoom, pitch: p.pitch, bearing: 90 - deg(h) + p.bearing, position: [0, 0, 0] };
+    }
+    const [lon, lat] = toLonLat(f, p.x, p.y);
+    return { longitude: lon, latitude: lat, zoom: p.zoom, pitch: p.pitch, bearing: p.bearing, position: [0, 0, 0] };
+  }
+
+  /** Poster mode on/off (needs a started story so the figure and the stop terminal exist). */
+  setPoster(cfg: PosterCfg | null): void {
+    this.poster = cfg;
+    basemapStatus.set({ photoTint: cfg === null ? null : POSTER_PHOTO_TINT });
+    const inp = this.inputs;
+    if (cfg !== null && this.posterInfra === null && inp !== null) {
+      void loadInfra(TWIN_SGG_CODE).then((api) => {
+        const infra = infraFromState(api, inp.state);
+        this.posterInfra = { control: infra.control === null ? null : { lon: infra.control.lon, lat: infra.control.lat }, stops: infra.stop.filter((s) => s.bit !== false), aeds: inp.state.aed.filter((a) => a.open === true) };
+      });
+    }
+    this.emit();
+  }
 
   private onPhase(p: Phase): void {
     this.phaseSeen = p;
@@ -458,25 +499,25 @@ export class StoryController implements StoryHost {
     const pr = m.person();
     const fallen = m.phase === "fall" || m.phase === "rescue" || m.phase === "done";
     const poles = [] as { id: string; xy: XY; heightM: number; color: [number, number, number, number]; radiusM: number }[];
-    if (!fallen) poles.push({ id: "stop", xy: plan.stop.xy, heightM: STOP_POLE_H, color: AMBER, radiusM: LAMP_R });
+    if (!fallen) poles.push({ id: "stop", xy: plan.stop.xy, heightM: STOP_POLE_H * (this.poster?.k ?? 1), color: AMBER, radiusM: LAMP_R * (this.poster?.k ?? 1) });
     if (fallen && this.crossingPole !== null) {
       const c = this.crossing;
       poles.push({ id: "signal", xy: this.crossingPole, heightM: SIGNAL_POLE_H, color: c === null || c.greenS === null ? GRAY : c.short ? RED : GREEN, radiusM: LAMP_R });
     }
     if (fallen && this.routeXY !== null) { const end = this.routeXY[this.routeXY.length - 1] as XY; poles.push({ id: "aed", xy: end, heightM: AED_POLE_H, color: GREEN, radiusM: LAMP_R * 1.6 }); }
-    layers.push(...streetLayers(sc, this.edges, clamp01(this.blend)));
+    layers.push(...streetLayers(sc, this.edges, clamp01(this.blend)).filter((l) => this.poster === null || l.id !== "story-roads-light"));
     layers.push(...shelterLayers(sc.center, plan.stop.xy, this.shelterHeading, SHELTER_ROOF_H));
     if (fallen && this.zebra !== null) layers.push(zebraLayer(sc.center, this.zebra.at, this.zebra.heading, this.zebra.len));
     layers.push(...poleLayers(sc.center, poles));
     if (fallen && this.crossing !== null) layers.push(ringLayer(sc.center, "story-crosswalk", this.crossingPole ?? this.crossing.xy, 2.6, [255, 255, 255, 230]));
     if (pr !== null) {
       const yaw = deg(pr.heading) + MODEL_YAW_OFFSET_DEG;
-      layers.push(actorLayer(sc.center, { id: "person", xy: pr.p, yawDeg: yaw, lieDeg: 90 * ease(m.lie01), z: 0.12 * m.lie01, anim: m.walking ? PERSON.walkAnim : 0.0001, tint: PERSON.tint }, DISPLAY_SCALE));
+      layers.push(actorLayer(sc.center, { id: "person", xy: pr.p, yawDeg: yaw, lieDeg: 90 * ease(m.lie01), z: 0.12 * m.lie01, anim: m.walking ? PERSON.walkAnim : 0.0001, tint: PERSON.tint }, DISPLAY_SCALE * (this.poster?.k ?? 1)));
     }
     if (fallen && pr !== null) layers.push(pulseLayer(sc.center, pr.p, ((now - this.pulseT0) % PULSE_PERIOD_MS) / PULSE_PERIOD_MS));
     if (this.routeXY !== null && fallen && m.rescue !== null) layers.push(...routeLayer(sc.center, this.routeXY, m.rescue.meters));
     const pb = m.passerby();
-    if (pb !== null) layers.push(actorLayer(sc.center, { id: "passerby", xy: pb.p, yawDeg: deg(pb.heading) + MODEL_YAW_OFFSET_DEG, lieDeg: 0, z: 0, anim: m.phase === "rescue" ? 2.4 : 0.0001, tint: PASSERBY_COLOR }, DISPLAY_SCALE));
+    if (pb !== null) layers.push(actorLayer(sc.center, { id: "passerby", xy: pb.p, yawDeg: deg(pb.heading) + MODEL_YAW_OFFSET_DEG, lieDeg: 0, z: 0, anim: m.phase === "rescue" ? 2.4 : 0.0001, tint: PASSERBY_COLOR }, DISPLAY_SCALE * (this.poster?.k ?? 1)));
   }
 
   /** Street follow camera with a smoothed centre/heading; blends from/to the control view. */
@@ -578,10 +619,10 @@ export class StoryController implements StoryHost {
     const fallen = m.phase === "fall" || m.phase === "rescue" || m.phase === "done";
     const pb = m.passerby();
     this.anchors = {
-      person: proj(pr?.p ?? null, fallen ? FALLEN_LABEL_H : PERSON.sizeM * DISPLAY_SCALE + 0.5),
+      person: proj(pr?.p ?? null, fallen ? FALLEN_LABEL_H : (PERSON.sizeM * DISPLAY_SCALE + 0.5) * (this.poster?.k ?? 1)),
       passerby: proj(pb?.p ?? null, PERSON.sizeM * DISPLAY_SCALE + 0.5),
       signal: fallen ? proj(this.crossingPole, SIGNAL_POLE_H + 0.5) : null,
-      stop: proj(this.plan?.stop.xy ?? null, STOP_POLE_H + 0.5),
+      stop: proj(this.plan?.stop.xy ?? null, (STOP_POLE_H + 0.5) * (this.poster?.k ?? 1)),
       aed: fallen && this.routeXY !== null ? proj(this.routeXY[this.routeXY.length - 1] as XY, AED_POLE_H + 0.5) : null,
     };
   }

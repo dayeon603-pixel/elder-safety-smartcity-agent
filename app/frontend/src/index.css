@@ -54,7 +54,7 @@
   --cr-bg: #EEF1F5; --cr-panel: #FFFFFF; --cr-panel2: #F3F6FA; --cr-line: #D9DEE5; --cr-text: #1F2937; --cr-muted: #5B6676;
   --cr-accent: #0F4C9A; --cr-ok: #2E9E5B; --cr-warn: #B7791F; --cr-bad: #D93025;
   background: var(--cr-bg); color: var(--cr-text); font-feature-settings: "tnum";
-  font-family: "Apple SD Gothic Neo", "Pretendard Variable", Pretendard, system-ui, sans-serif; font-size: 15px;
+  font-family: "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", system-ui, sans-serif; font-size: 16px; line-height: 1.5;
 }
 .twin a { color: var(--cr-muted); text-decoration: none; }
 .twin a:hover { color: var(--cr-text); }
@@ -74,3 +74,10 @@
 .twin-cam > div { width: 100%; }
 @keyframes twin-swap { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 .twin-swap { animation: twin-swap 420ms ease-out; }
+
+/* KRDS-style visible keyboard focus */
+.twin :focus-visible { outline: 3px solid #0F4C9A; outline-offset: 2px; border-radius: 4px; }
+
+@keyframes twin-blink { 0%, 100% { opacity: 1; } 50% { opacity: .15; } }
+.twin-blink { animation: twin-blink 0.9s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .twin-blink { animation-duration: 0.9s !important; animation-iteration-count: infinite !important; } }

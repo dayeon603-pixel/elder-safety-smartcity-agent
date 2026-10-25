@@ -174,7 +174,7 @@ def heat_message(region_name: str, heat: dict[str, Any], weather: dict[str, Any]
         return None
     feels = weather.get("feels")
     felt = f"체감 {feels:.1f}도. " if isinstance(feels, (int, float)) else ""
-    b1 = "기상특보는 없지만 " if heat.get("b1_alert") is False else ""
+    b1 = "특보 기준에는 못 미치지만 " if heat.get("b1_alert") is False else ""
     topic = "은" if region_name.endswith("군") else "는"
     where = "가까운 무더위쉼터와 열린 AED 위치를 화면에서 확인하세요." if has_shelters else "가까운 열린 AED 위치를 화면에서 확인하세요."
     if aed_hint:

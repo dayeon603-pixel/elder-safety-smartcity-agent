@@ -4,10 +4,10 @@ import type { MutableRefObject } from "react";
 import { apiUrl, runAgent } from "../api/agent";
 import type { AgentResult, AgentStep } from "../api/agent";
 import {
-  daytypeOf, loadActions, loadEffects, loadFallSummary, loadLetter, publishFall, postJson, rec, str, loadAuditHead, loadRainDays, loadRoute, loadTwinState, postDecision, publishTerminal,
+  daytypeOf, loadActions, loadEffects, loadNeighborSignals, loadFallSummary, loadLetter, publishFall, postJson, rec, str, loadAuditHead, loadRainDays, loadRoute, loadTwinState, postDecision, publishTerminal,
 } from "./api";
 import type { AuditHead, FeedbackRecord } from "./api";
-import { SILVER_FLIP_DELAY_MS, STEP_HOURS, TWIN_DEMO_DATE, TWIN_FIRST_HOUR, TWIN_LAST_HOUR, TWIN_NIGHT_HOUR, TWIN_PLAY_SEC_PER_HOUR, TWIN_SGG_CODE, TRAINING_LABEL } from "./constants";
+import { SIGNAL_NEIGHBOR_CODE, SILVER_FLIP_DELAY_MS, STEP_HOURS, TWIN_DEMO_DATE, TWIN_FIRST_HOUR, TWIN_LAST_HOUR, TWIN_NIGHT_HOUR, TWIN_PLAY_SEC_PER_HOUR, TWIN_SGG_CODE, TRAINING_LABEL } from "./constants";
 import type { TwinEngine } from "./engine";
 import { nearestStop, pickCameraPlace, scoreboard } from "./place";
 import type { CameraPlace } from "./place";
@@ -15,6 +15,8 @@ import { clock, generateActionCap, generateCap, readCap, readFhir, short } from 
 import type { Artefact } from "./protocol";
 import { infraFromState, infraInsideZones, loadInfra } from "./infra";
 import type { Infra } from "./infra";
+import { frameHotspots, loadSilverContext } from "./silverStep";
+import type { SilverContext } from "./silverStep";
 import { loadScene } from "./sceneLoader";
 import { TOAST_MS, hhmmKst, loadInbox } from "./work";
 import type { CardTimes, InboxCounts, Toast } from "./work";
@@ -22,6 +24,10 @@ import { storyBridge } from "./story/host";
 import type { LoadedScene } from "./sceneLoader";
 import type { ActionsView, CardLetter, EffectChip, Mode, RainDay, ScenarioId, StepNo, TwinState } from "./types";
 
+const SILVER_PITCH = 20;
+const SILVER_MORPH_MS = 2500;
+const SIGNAL_ZOOM = 16.6;
+const SIGNAL_PITCH = 38;
 const FALL_MINUTE = Math.round((STEP_HOURS.incident % 1) * 60);
 const ROUTE_ANIM_SPEEDUP = 40;
 const ROUTE_ANIM_MIN_MS = 2500;
@@ -123,6 +129,7 @@ export function useTwin(engineRef: MutableRefObject<TwinEngine | null>): TwinCtl
     setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), TOAST_MS);
   }, []);
   const [apiInfra, setApiInfra] = useState<Infra | null>(null);
+  const silverCtx = useRef<SilverContext | null>(null);
   const [silverInside, setSilverInside] = useState<number | null>(null);
   const [effects, setEffects] = useState<Record<string, EffectChip> | null>(null);
   const [stepsDone, setStepsDone] = useState<Record<StepNo, boolean>>({ 1: false, 2: false, 3: false, 4: false, 5: false, 6: false });
@@ -161,6 +168,10 @@ export function useTwin(engineRef: MutableRefObject<TwinEngine | null>): TwinCtl
   useEffect(() => {
     const eng = engineRef.current;
     if (scene !== null && eng !== null) eng.setScene(scene.scene);
+    if (scene === null) return;
+    let alive = true;
+    loadSilverContext(TWIN_SGG_CODE, scene.scene.bbox, 300).then((c) => { if (alive) { silverCtx.current = c; engineRef.current?.setSilverContext(c); } }).catch(() => undefined);
+    return () => { alive = false; };
   }, [scene, engineRef]);
 
   // state for (date, integer hour): cached
@@ -181,7 +192,11 @@ export function useTwin(engineRef: MutableRefObject<TwinEngine | null>): TwinCtl
   useEffect(() => {
     let alive = true;
     const timer = setTimeout(() => {
-      loadActions(date, hourKey).then((a) => { if (alive) { setActions(a); setActionsError(null); } }).catch((e: unknown) => { if (alive) setActionsError(e instanceof Error ? e.message : String(e)); });
+      loadActions(date, hourKey).then(async (a) => {
+        // 관악구 has no crosswalk with a short green time on the demo day: append the adjacent 구's 신호 연장 협의 card (labelled)
+        const extra = a.night || a.cards.some((c) => c.id === "signals") ? null : await loadNeighborSignals(date, hourKey, SIGNAL_NEIGHBOR_CODE);
+        if (alive) { setActions(extra === null ? a : { ...a, cards: [...a.cards, extra] }); setActionsError(null); }
+      }).catch((e: unknown) => { if (alive) setActionsError(e instanceof Error ? e.message : String(e)); });
     }, ACTIONS_DEBOUNE_MS);
     return () => { alive = false; clearTimeout(timer); };
   }, [date, hourKey]);
@@ -321,7 +336,7 @@ export function useTwin(engineRef: MutableRefObject<TwinEngine | null>): TwinCtl
       setFall((f) => ({ ...f, routeText: text }));
       push(`가장 가까운 열린 AED ${text}`, "step");
     });
-  }, [engineRef, push, setDay, setHour]);
+  }, [engineRef, push, setDay, setHour, toast]);
 
   const reveal = useCallback((a: Artefact): void => {
     const lines = a.content.split("\n").length;
@@ -365,13 +380,26 @@ export function useTwin(engineRef: MutableRefObject<TwinEngine | null>): TwinCtl
       push(`${publishText} · ${TRAINING_LABEL}`, pub === "ok" ? "step" : "warn");
       setFall((f) => ({ ...f, status: "done", publishText }));
       toast(`${publishText} · ${TRAINING_LABEL}`);
-      markDone(4);
+      markDone(5);
+    }).catch((e: unknown) => {
+      push(`낙상 연계 실패: ${e instanceof Error ? e.message : String(e)}`, "warn");
+    }).finally(() => {
       fallBusy.current = false;
     });
-  }, [push, showAgentArtefacts, markDone, engineRef]);
+  }, [push, showAgentArtefacts, markDone, engineRef, toast]);
 
   // ---------- actions ----------
-  const selectCard = useCallback((id: string | null): void => setSelectedCard(id), []);
+  const selectCard = useCallback((id: string | null): void => {
+    setSelectedCard(id);
+    const card = actions?.cards.find((c) => c.id === id);
+    const eng = engineRef.current;
+    if (eng === null) return;
+    if (card !== undefined && card.items.length > 0) {
+      const worst = card.items.reduce((m, x) => (x.required - x.green > m.required - m.green ? x : m), card.items[0] as (typeof card.items)[number]);
+      eng.setSignalShort(card.items.map((x) => ({ lon: x.lon, lat: x.lat, text: `녹색 ${x.green}초 < 필요 ${x.required}초` })));
+      eng.setViewState({ longitude: worst.lon, latitude: worst.lat, zoom: SIGNAL_ZOOM, pitch: SIGNAL_PITCH, bearing: 0 }, 1600, true);
+    } else eng.setSignalShort([]);
+  }, [actions, engineRef]);
 
   const generateCapFor = useCallback((cardId: string | null): void => {
     const pl = placeRef.current;
@@ -405,7 +433,7 @@ export function useTwin(engineRef: MutableRefObject<TwinEngine | null>): TwinCtl
       setTimes((m) => ({ ...m, [cardId]: { ...(m[cardId] ?? { draft: actions?.generatedAt.slice(0, 5) ?? hhmmKst() }), sent: hhmmKst(r.createdAt) } }));
       toast(`${d === "채택" ? "재난 대응 초안 상신됨" : "보류 기록됨"} · 감사 기록 #${r.id}`);
       void loadInbox().then((i) => setInbox(i)).catch(() => undefined);
-      push(`${d === "채택" ? "주무관 채택(상신)" : "보류(사유 기록)"} · 판단 기록 #${r.id}${audit?.head ? `  변조 탐지 기록 ${audit.valid ? "정상" : "불일치"} · ${audit.head.slice(0, 8)}…` : ""}`, "step");
+      push(`${d === "채택" ? "주무관 채택(상신)" : "보류(사유 기록)"} · 판단 기록 #${r.id}${audit?.head ? `  변조 탐지 기록 ${audit.valid ? "정상" : "불일치"} · ${audit.head.slice(0, 12)}` : ""}`, "step");
       if (d === "채택") {
         setStages((m) => ({ ...m, [cardId]: 2 }));
         markDone(2);
@@ -460,7 +488,9 @@ export function useTwin(engineRef: MutableRefObject<TwinEngine | null>): TwinCtl
     eng?.stopPulse();
     eng?.clearRoute();
     eng?.setHighlight(null);
+    eng?.setSignalShort([]);
     setPlaying(false);
+    eng?.setSilverStep(s === "silver");
     const asis = (): void => { setModeState("asis"); eng?.setMode("asis"); };
     if (s === "s1") {
       asis(); setDay(TWIN_DEMO_DATE); setHour(STEP_HOURS.brief); eng?.flyTo("overview"); markDone(1);
@@ -470,9 +500,13 @@ export function useTwin(engineRef: MutableRefObject<TwinEngine | null>): TwinCtl
       asis(); setDay(TWIN_DEMO_DATE); setHour(STEP_HOURS.deliver); eng?.flyTo("overview"); markDone(3);
     } else if (s === "silver") {
       // 어디에: start from [현행 기준], then flip to [에이전트] so the zones morph and the hotspot dots recolour
-      asis(); setDay(TWIN_DEMO_DATE); setHour(STEP_HOURS.silver); eng?.flyTo("overview");
+      asis(); setDay(TWIN_DEMO_DATE); setHour(STEP_HOURS.silver);
+      eng?.setSilverStep(true);
+      const frame = silverCtx.current === null ? null : frameHotspots(silverCtx.current);
+      if (frame !== null) eng?.setViewState({ longitude: frame.lon, latitude: frame.lat, zoom: frame.zoom, pitch: SILVER_PITCH, bearing: 0 }, 1800, true);
+      else eng?.flyTo("overview");
       setTimeout(() => {
-        setModeState("ours"); eng?.setMode("ours"); markDone(4);
+        setModeState("ours"); eng?.setMode("ours", SILVER_MORPH_MS); markDone(4);
         const st = stateRef.current;
         const inside = st === null ? [] : infraInsideZones(infraRef.current, st.silverOurs, st.silverRadiusM);
         setSilverInside(inside.length);
@@ -490,9 +524,12 @@ export function useTwin(engineRef: MutableRefObject<TwinEngine | null>): TwinCtl
     }
   }, [engineRef, setHour, rainBest, setDay, markDone]);
 
+  // 근거 기록 is counted for this session only: audit entries now minus the count when the page loaded
+  const entriesBaseline = useRef<number | null>(null);
+  if (entries !== null && entriesBaseline.current === null) entriesBaseline.current = entries.n;
   const tally = useMemo(() => {
     const vals = Object.values(decisions);
-    return { adopt: vals.filter((d) => d.rec.decision === "채택").length, hold: vals.filter((d) => d.rec.decision === "보류").length, entries: entries?.n ?? null, valid: entries?.valid ?? null };
+    return { adopt: vals.filter((d) => d.rec.decision === "채택").length, hold: vals.filter((d) => d.rec.decision === "보류").length, entries: entries === null || entriesBaseline.current === null ? null : Math.max(0, entries.n - entriesBaseline.current), valid: entries?.valid ?? null };
   }, [decisions, entries]);
 
   return {

@@ -5,8 +5,14 @@ import "./index.css";
 
 const container = document.getElementById("root");
 if (container === null) throw new Error("root element missing");
-createRoot(container).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
+const root = container;
+function mount(): void {
+  createRoot(root).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  );
+}
+// Public 시연판: the recorded-fixture backend must be installed before anything calls fetch.
+if (import.meta.env.VITE_STATIC === "1") void import("./static/install").then((m) => m.installStatic()).then(mount);
+else mount();

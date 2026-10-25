@@ -128,6 +128,17 @@ export interface InfraCtx {
   hidden: boolean;
 }
 
+export interface SignalShort { lon: number; lat: number; text: string }
+
+/** Crosswalks whose green time is shorter than required at 0.7 m/s: red rings with the numbers as labels. */
+export function signalShortLayers(items: SignalShort[]): Layer[] {
+  if (items.length === 0) return [];
+  return [
+    new ScatterplotLayer({ id: "signal-short-ring", data: items, getPosition: (d) => [d.lon, d.lat, 40], radiusUnits: "pixels", getRadius: 20, filled: true, getFillColor: [217, 48, 37, 70], stroked: true, getLineColor: [217, 48, 37, 255], lineWidthMinPixels: 3, pickable: false }),
+    label("signal-short-label", items.slice(0, 8), [255, 255, 255, 255], -34),
+  ];
+}
+
 export function infraLayers(c: InfraCtx): Layer[] {
   if (c.hidden) return [];
   const url = drawAtlas();

@@ -36,8 +36,8 @@ export function QrOverlay({ onClose }: { onClose: () => void }) {
         )}
         <p className="m-0 mt-5 text-[28px] font-bold text-[#0F4C9A]">휴대폰으로 찍어 보세요</p>
         <p className="m-0 mt-1 text-[18px] text-[#1F2937]">이 휴대폰이 정류장 안내단말이 됩니다</p>
-        {typeof url === "string" && <p className="m-0 mt-4 break-all text-center text-[12px] text-[#5B6676]" data-testid="qr-url">{url} · 같은 와이파이 · 읽기 전용</p>}
-        <p className="m-0 mt-2 text-[12px] text-[#9AA5B4]">Esc 또는 Q로 닫기</p>
+        {typeof url === "string" && <p className="m-0 mt-4 break-all text-center text-[13px] text-[#5B6676]" data-testid="qr-url">{url} · 같은 와이파이 · 읽기 전용</p>}
+        <p className="m-0 mt-2 text-[13px] text-[#5B6676]">Esc 또는 Q로 닫기</p>
       </div>
     </div>
   );

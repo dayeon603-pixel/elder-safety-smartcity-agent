@@ -2,7 +2,7 @@
 import type { Layer } from "@deck.gl/core";
 import { loadBasemap } from "./data";
 import type { Basemap } from "./data";
-import { basemapLayers, labelLayers } from "./layers";
+import { basemapLayers, labelLayers, photoEarthLayer } from "./layers";
 import type { BaseCtx } from "./layers";
 import { probeSatellite, satelliteLayer } from "./satellite";
 import { basemapStatus } from "./store";
@@ -44,10 +44,10 @@ export class BasemapController {
     if (m === null) return { under: [], over: [] };
     const photo = basemapStatus.get().mode === "satellite";
     const ctx: BaseCtx = { ...c, photo };
-    const k = `${Math.round(c.day * 20)}|${c.heat ? 1 : 0}|${c.street ? 1 : 0}|${c.boundary.length}|${photo ? 1 : 0}`;
+    const k = `${Math.round(c.day * 20)}|${c.heat ? 1 : 0}|${c.street ? 1 : 0}|${c.boundary.length}|${photo ? 1 : 0}|${basemapStatus.get().photoTint?.join(",") ?? ""}`;
     if (k !== this.key) {
       this.key = k;
-      this.base = [...(photo ? [satelliteLayer(c.day, { onFail: () => this.fallBack() })] : []), ...basemapLayers(m, ctx)];
+      this.base = [...(photo ? [photoEarthLayer(ctx), satelliteLayer(c.day, { onFail: () => this.fallBack() })] : []), ...basemapLayers(m, ctx)];
       this.labels = labelLayers(m, ctx);
     }
     return { under: this.base, over: this.labels };

@@ -4,6 +4,8 @@ import type { StageStats, TwinEngine } from "./engine";
 export class PerfProbe {
   constructor(private readonly engine: TwinEngine) {}
   view(): ReturnType<TwinEngine["debugView"]> { return this.engine.debugView(); }
+  /** Measurement / screenshot aid: put the camera on a point (e.g. an overhead view of the fall route). */
+  focus(lon: number, lat: number, zoom: number, pitch: number, bearing: number): void { this.engine.setViewState({ longitude: lon, latitude: lat, zoom, pitch, bearing }, 0); }
   stats(): StageStats { return this.engine.stats(); }
   /** Orbit the camera for `ms` and resolve with the stats of that window. */
   orbit(ms: number): Promise<StageStats> {

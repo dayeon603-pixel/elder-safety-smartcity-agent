@@ -12,6 +12,8 @@ export interface StoryFrame {
   controlled: boolean;
   /** true once the camera is near street level: the control-room overlays are hidden */
   street: boolean;
+  /** poster render: control-room overlays hidden (the poster draws its own) */
+  poster?: boolean;
 }
 export interface StoryHost { frame(now: number): StoryFrame }
 /** What the story needs back from the engine. */
